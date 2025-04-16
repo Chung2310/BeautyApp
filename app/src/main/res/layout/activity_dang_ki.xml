@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:orientation="vertical"
+    android:background="#ffefd5"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activity.DangKiActivity">
+    <TextView
+
+        app:layout_constraintTop_toTopOf="parent"
+        android:text="Đăng ký"
+        android:gravity="center"
+        android:textFontWeight="@integer/material_motion_duration_short_2"
+        android:textStyle="bold"
+        android:textSize="40dp"
+        android:textColor="#056109"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <com.google.android.material.textfield.TextInputLayout
+        app:layout_constraintTop_toBottomOf="@+id/txtdangnhap"
+        android:id="@+id/emailDK"
+        style="@style/Widget.Material3.TextInputEditText.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/txtemailDK"
+            android:inputType="textEmailAddress"
+            android:hint="Email"
+            android:drawablePadding="5dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        app:layout_constraintTop_toBottomOf="@+id/emailDK"
+        android:id="@+id/passwordDK"
+        style="@style/Widget.Material3.TextInputEditText.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPassword"
+            android:id="@+id/txtpassDK"
+            android:hint="Password"
+            android:drawablePadding="5dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        app:layout_constraintTop_toBottomOf="@+id/passwordDK"
+        android:id="@+id/passwordXT"
+        style="@style/Widget.Material3.TextInputEditText.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <com.google.android.material.textfield.TextInputEditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPassword"
+            android:hint="Password"
+            android:id="@+id/txtpassxacnhan"
+            android:drawablePadding="5dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnDangKy"
+        app:layout_constraintTop_toBottomOf="@+id/name_user"
+        android:text="Đăng ký"
+        android:layout_marginLeft="40dp"
+        android:layout_marginRight="40dp"
+        android:textStyle="bold"
+        android:textColor="#056109"
+        android:textSize="25dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+</LinearLayout>
