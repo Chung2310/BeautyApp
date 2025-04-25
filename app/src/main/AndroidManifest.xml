@@ -13,9 +13,13 @@
         android:theme="@style/Theme.BeautyApp"
         tools:targetApi="31">
         <activity
+            android:name=".activity.UserActivity"
+            android:theme="@style/Theme.AppCompat.NoActionBar"
+            android:exported="false" />
+        <activity
             android:name=".activity.SplashActivity"
-            android:theme="@style/Theme.BeautyApp.NoActionBar"
-            android:exported="true" >
+            android:exported="true"
+            android:theme="@style/Theme.BeautyApp.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -27,14 +31,12 @@
             android:exported="false" />
         <activity
             android:name=".activity.DangNhapActivity"
-            android:exported="false">
-
-        </activity>
+            android:exported="false"></activity>
         <activity
             android:name=".activity.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.BeautyApp.NoActionBar"></activity>
+            android:theme="@style/Theme.BeautyApp.NoActionBar" />
     </application>
 
 </manifest>

@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment;
 import com.bumptech.glide.Glide;
 import com.example.beautyapp.R;
 import com.example.beautyapp.databinding.FragmentHomeBinding;
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,14 +30,27 @@ public class HomeFragment extends Fragment {
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        // Ánh xạ ViewFlipper từ layout
-        viewFlipper = binding.viewflipperMHC;
 
-        // Thiết lập banner
-        setupBanners();
+
+        anhXa();
+        control();
+
+        //setupBanners();
 
         return root;
     }
+
+    private void control() {
+
+
+    }
+
+    private void anhXa() {
+
+
+    }
+
+
 
     private void setupBanners() {
         // Danh sách banner làm đẹp (thay bằng URL thực tế sau)

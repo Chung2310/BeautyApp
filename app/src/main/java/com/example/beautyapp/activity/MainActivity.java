@@ -1,5 +1,7 @@
 package com.example.beautyapp.activity;
 
+import static com.example.beautyapp.utils.Utils.user_current;
+
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -14,6 +16,7 @@ import android.widget.ViewFlipper;
 
 import com.bumptech.glide.Glide;
 import com.example.beautyapp.R;
+import com.example.beautyapp.model.User;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
 
@@ -36,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityMainBinding binding;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,9 +122,16 @@ public class MainActivity extends AppCompatActivity {
             TextView textViewAge = headerView.findViewById(R.id.txtnamsinhmain);
             ImageView imageViewAvatar = headerView.findViewById(R.id.imageView);
 
+            imageViewAvatar.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(getApplicationContext(),UserActivity.class);
+                    startActivity(intent);
+                }
+            });
+
             textViewName.setText(name);
             textViewEmail.setText(email);
-
 
             // Lấy dữ liệu bổ sung từ Firestore
             FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -132,13 +143,19 @@ public class MainActivity extends AppCompatActivity {
                             Uri photoUrl = Uri.parse(documentSnapshot.getString("image"));
                             if (fullName != null) {
                                 textViewName.setText(fullName);
-                                textViewAge.setText(age);
+                                textViewAge.setText("Năm sinh: "+age);
                                 if (photoUrl != null) {
                                     Glide.with(this)
                                             .load(photoUrl)
                                             .placeholder(R.drawable.android)
                                             .into(imageViewAvatar);
                                 }
+                                User user1 = new User();
+                                user1.setAge(age);
+                                user1.setImage(photoUrl);
+                                user1.setEmail(email);
+                                user1.setName(fullName);
+                                user_current=user1;
                             }
                         }
                     })

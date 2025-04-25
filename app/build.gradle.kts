@@ -53,22 +53,48 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 
-    implementation ("androidx.core:core-ktx:1.12.0")
-    implementation ("androidx.activity:activity-compose:1.8.2")
-    implementation ("androidx.compose.material3:material3:1.2.1")
-    implementation ("com.google.firebase:firebase-auth-ktx:22.3.0")
-    implementation ("com.google.ar:core:1.40.0")
-    implementation ("androidx.room:room-ktx:2.6.1")
-    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation ("com.google.android.exoplayer:exoplayer:2.19.1")
-    implementation ("io.reactivex.rxjava3:rxandroid:3.0.0")
-    implementation ("io.reactivex.rxjava3:rxjava:3.0.0")
-    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation ("com.github.akarnokd:rxjava3-retrofit-adapter:3.0.0")
-    implementation("com.google.firebase:firebase-analytics")
-    implementation(platform("com.google.firebase:firebase-bom:33.12.0"))
-    implementation("com.google.firebase:firebase-auth")
-    implementation ("com.airbnb.android:lottie:6.1.0")
-    implementation ("io.github.pilgr:paperdb:2.7.2")
-    implementation ("com.github.bumptech.glide:glide:4.16.0")
+    dependencies {
+        // Core
+        implementation ("androidx.core:core-ktx:1.12.0")
+        implementation ("androidx.activity:activity-compose:1.8.2")
+        implementation ("androidx.compose.material3:material3:1.2.1")
+        implementation ("com.google.android.material:material:1.9.0")
+
+        // Firebase (dùng BOM)
+        implementation(platform("com.google.firebase:firebase-bom:33.12.0"))
+        implementation("com.google.firebase:firebase-auth-ktx")
+        implementation("com.google.firebase:firebase-analytics-ktx")
+
+        // AR & ML Kit
+
+
+        // Database
+        implementation ("androidx.room:room-ktx:2.6.1")
+        implementation ("io.github.pilgr:paperdb:2.7.2")  // Yêu cầu JitPack repo
+
+        // Network
+        implementation ("com.squareup.retrofit2:retrofit:2.9.0")
+        implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+        implementation ("com.github.akarnokd:rxjava3-retrofit-adapter:3.0.0")
+
+        // RxJava
+        implementation ("io.reactivex.rxjava3:rxandroid:3.0.0")
+        implementation ("io.reactivex.rxjava3:rxjava:3.0.0")
+
+        // Media
+        implementation ("com.google.android.exoplayer:exoplayer:2.19.1")
+
+        // UI
+        implementation ("com.airbnb.android:lottie:6.1.0")
+        implementation ("de.hdodenhof:circleimageview:3.1.0")
+        implementation ("com.github.bumptech.glide:glide:4.16.0")
+        annotationProcessor ("com.github.bumptech.glide:compiler:4.16.0")
+
+        // CameraX
+        implementation ("androidx.camera:camera-core:1.3.0")
+        implementation ("androidx.camera:camera-camera2:1.3.0")
+        implementation ("androidx.camera:camera-lifecycle:1.3.0")
+        implementation ("androidx.camera:camera-view:1.3.0")
+    }
+
 }
