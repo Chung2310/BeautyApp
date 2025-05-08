@@ -29,6 +29,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/txtemailDK"
+            android:textStyle="bold"
             android:inputType="textEmailAddress"
             android:hint="Email"
             android:drawablePadding="5dp"
@@ -48,6 +49,7 @@
             android:inputType="textPassword"
             android:id="@+id/txtpassDK"
             android:hint="Password"
+            android:textStyle="bold"
             android:drawablePadding="5dp"
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"/>
@@ -62,6 +64,7 @@
         <com.google.android.material.textfield.TextInputEditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:textStyle="bold"
             android:inputType="textPassword"
             android:hint="Password"
             android:id="@+id/txtpassxacnhan"
@@ -76,9 +79,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <com.google.android.material.textfield.TextInputEditText
+            android:textStyle="bold"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textPassword"
             android:hint="Họ và Tên"
             android:id="@+id/txtten"
             android:drawablePadding="5dp"
@@ -91,15 +94,15 @@
         style="@style/Widget.Material3.TextInputEditText.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        <com.google.android.material.textfield.TextInputEditText
+        <androidx.appcompat.widget.AppCompatButton
+            android:textStyle="bold"
+            android:layout_gravity="end"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:id="@+id/btnAddDate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textPassword"
-            android:hint=" Năm sinh"
-            android:id="@+id/txtnamsinh"
-            android:drawablePadding="5dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"/>
+            android:text="Chọn ngày sinh" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <androidx.appcompat.widget.AppCompatButton

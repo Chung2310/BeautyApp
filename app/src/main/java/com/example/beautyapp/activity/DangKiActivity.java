@@ -1,5 +1,6 @@
 package com.example.beautyapp.activity;
 
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,6 +17,9 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.beautyapp.R;
+import com.example.beautyapp.retrofit.Api;
+import com.example.beautyapp.retrofit.RetrofitClient;
+import com.example.beautyapp.utils.Utils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
@@ -24,15 +28,24 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.core.Scheduler;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class DangKiActivity extends AppCompatActivity {
 
     private FirebaseAuth firebaseAuth;
-    private TextInputEditText txtemailDK, txtpassDK, txtpassxacnhan, txtten, txtnamsinh;
-    private AppCompatButton btnDangKy;
+    private TextInputEditText txtemailDK, txtpassDK, txtpassxacnhan, txtten;
+    private AppCompatButton btnDangKy, btnAddDate;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private CompositeDisposable compositeDisposable;
+    private Api api;
+    private String date;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,8 +57,10 @@ public class DangKiActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-
+        compositeDisposable = new CompositeDisposable();
         firebaseAuth = FirebaseAuth.getInstance();
+        api = RetrofitClient.getInstance(Utils
+                .BASE_URL).create(Api.class);
         anhXa();
 
         btnDangKy.setOnClickListener(new View.OnClickListener() {
@@ -55,9 +70,9 @@ public class DangKiActivity extends AppCompatActivity {
                 String password = txtpassDK.getText().toString().trim();
                 String passwordXacnhan = txtpassxacnhan.getText().toString().trim();
                 String hoten = txtten.getText().toString().trim();
-                String namsinh = txtnamsinh.getText().toString().trim();
 
-                if (email.isEmpty() || password.isEmpty() || passwordXacnhan.isEmpty() || hoten.isEmpty() || namsinh.isEmpty()) {
+
+                if (email.isEmpty() || password.isEmpty() || passwordXacnhan.isEmpty() || hoten.isEmpty() || date.isEmpty()) {
                     Toast.makeText(getApplicationContext(), "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_LONG).show();
                     return;
                 }
@@ -73,30 +88,33 @@ public class DangKiActivity extends AppCompatActivity {
                             public void onComplete(@NonNull Task<AuthResult> task) {
                                 if (task.isSuccessful()) {
                                     FirebaseUser user = firebaseAuth.getCurrentUser();
-                                    Toast.makeText(getApplicationContext(), "Đăng ký thành công", Toast.LENGTH_SHORT).show();
-                                    String uid = user.getUid(); // Lấy UID người dùng
+                                    String user_id = user.getUid();
+                                    Log.d("dangky","Đăng ký thành công"+user_id);
+                                    //tạo người dùng trong mysql
+                                    compositeDisposable.add(api.addUser(user_id,email,password,hoten,date)
+                                            .subscribeOn(Schedulers.io())
+                                            .observeOn(AndroidSchedulers.mainThread())
+                                            .subscribe(
+                                                    messageModel -> {
 
-                                    // Tạo dữ liệu người dùng lưu vào Firestore
-                                    Map<String, Object> userData = new HashMap<>();
-                                    userData.put("name", hoten);
-                                    userData.put("email", email);
-                                    userData.put("age", namsinh);
-                                    userData.put("image", "");
+                                                        if (messageModel.isSuccess()) {
+                                                            Intent intent = new Intent(DangKiActivity.this, DangNhapActivity.class);
+                                                            intent.putExtra("email", email);
+                                                            intent.putExtra("pass", password);
+                                                            startActivity(intent);
+                                                            Log.d("dangky", messageModel.getMessage());
+                                                        } else {
+                                                            Log.d("dangky", messageModel.getMessage());
+                                                        }
+                                                    },throwable -> {
+                                                        Log.d("loidangky",throwable.getMessage());
+                                                    }
+                                            )
+                                    );
 
-                                    db.collection("users")
-                                            .document(uid) // Dùng UID làm ID document
-                                            .set(userData)
-                                            .addOnSuccessListener(aVoid -> {
-                                                Log.d("FIRESTORE", "User data saved");
-                                            })
-                                            .addOnFailureListener(e -> {
-                                                Log.w("FIRESTORE", "Error saving user data", e);
-                                            });
-                                    Intent intent = new Intent(DangKiActivity.this, DangNhapActivity.class);
-                                    intent.putExtra("email", email);
-                                    intent.putExtra("pass",password);
 
-                                    startActivity(intent);
+
+
                                     finish();
                                 } else {
                                     String errorMessage = task.getException() != null ? task.getException().getMessage() : "Đăng ký thất bại";
@@ -106,6 +124,21 @@ public class DangKiActivity extends AppCompatActivity {
                         });
             }
         });
+
+        btnAddDate.setOnClickListener(v -> {
+            Calendar calendar = Calendar.getInstance();
+            int year = calendar.get(Calendar.YEAR);
+            int month = calendar.get(Calendar.MONTH);
+            int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+            DatePickerDialog datePickerDialog = new DatePickerDialog(this,
+                    (view, selectedYear, selectedMonth, selectedDay) -> {
+                        date = selectedDay + "/" + (selectedMonth + 1) + "/" + selectedYear;
+                        btnAddDate.setText(date);
+                    }, year, month, day);
+            datePickerDialog.show();
+        });
+
     }
 
     private void anhXa() {
@@ -114,7 +147,13 @@ public class DangKiActivity extends AppCompatActivity {
         txtpassxacnhan = findViewById(R.id.txtpassxacnhan);
         btnDangKy = findViewById(R.id.btnDangKy);
         txtten = findViewById(R.id.txtten);
-        txtnamsinh = findViewById(R.id.txtnamsinh);
+        btnAddDate = findViewById(R.id.btnAddDate);
     }
 
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        compositeDisposable.clear();
+    }
 }

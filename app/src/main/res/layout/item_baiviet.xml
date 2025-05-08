@@ -22,6 +22,11 @@
                 android:id="@+id/nameUserItemBaiViet"
                 android:layout_width="match_parent"
                 android:layout_height="25dp"/>
+            <TextView
+                android:layout_marginStart="10dp"
+                android:id="@+id/timeItemBaiViet"
+                android:layout_width="match_parent"
+                android:layout_height="25dp"/>
 
         </LinearLayout>
 

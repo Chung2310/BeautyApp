@@ -151,6 +151,7 @@ public class MainActivity extends AppCompatActivity {
                                             .into(imageViewAvatar);
                                 }
                                 User user1 = new User();
+                                user1.setUser_id(user.getUid());
                                 user1.setAge(age);
                                 user1.setImage(photoUrl);
                                 user1.setEmail(email);

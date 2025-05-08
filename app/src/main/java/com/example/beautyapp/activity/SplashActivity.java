@@ -55,7 +55,7 @@ public class SplashActivity extends AppCompatActivity {
         FirebaseUser currentUser = auth.getCurrentUser();
 
         if (currentUser != null) {
-            // Người dùng đã đăng nhập
+
             navigateToMain();
         } else {
             // Kiểm tra token lưu trữ

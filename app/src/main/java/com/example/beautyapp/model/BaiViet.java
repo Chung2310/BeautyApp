@@ -1,11 +1,41 @@
 package com.example.beautyapp.model;
 
+import com.google.type.DateTime;
+
+import java.time.LocalDateTime;
+
 public class BaiViet {
     private String id;
     private Double soLike;
     private String noiDung;
-    private String image;
-    private String name;
+    private LocalDateTime time;
+    private String nameUser;
+    private String imageUser;
+
+    public String getImageUser() {
+
+        return imageUser;
+    }
+
+    public void setImageUser(String imageUser) {
+        this.imageUser = imageUser;
+    }
+
+    public LocalDateTime getTime() {
+        return time;
+    }
+
+    public void setTime(LocalDateTime time) {
+        this.time = time;
+    }
+
+    public String getNameUser() {
+        return nameUser;
+    }
+
+    public void setNameUser(String nameUser) {
+        this.nameUser = nameUser;
+    }
 
     public String getId() {
         return id;
@@ -31,19 +61,4 @@ public class BaiViet {
         this.noiDung = noiDung;
     }
 
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 }

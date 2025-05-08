@@ -1,41 +1,79 @@
 package com.example.beautyapp.ui.home;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+import android.widget.Toast;
 import android.widget.ViewFlipper;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.beautyapp.R;
+import com.example.beautyapp.adapter.BaiVietAdapter;
 import com.example.beautyapp.databinding.FragmentHomeBinding;
+import com.example.beautyapp.model.BaiViet;
+import com.example.beautyapp.retrofit.Api;
+import com.example.beautyapp.retrofit.RetrofitClient;
+import com.example.beautyapp.utils.Utils;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
+
 public class HomeFragment extends Fragment {
 
     private FragmentHomeBinding binding;
     private ViewFlipper viewFlipper;
+    private RecyclerView recyclerView;
+    private Api api;
+    private CompositeDisposable compositeDisposable;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-
+        api = RetrofitClient.getInstance(Utils.BASE_URL).create(Api.class);
+        compositeDisposable = new CompositeDisposable();
 
         anhXa();
         control();
 
-        //setupBanners();
+        try {
+            compositeDisposable.add(api.getAllArticle(Utils.user_current.getUser_id())
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(
+                            baiVietModel -> {
+                                if(baiVietModel.isSuccess()){
+                                    List<BaiViet> baiVietList = baiVietModel.getResult();
+                                    BaiVietAdapter adapter = new BaiVietAdapter(getContext(),baiVietList);
+                                    recyclerView.setAdapter(adapter);
+                                }
+                            },throwable -> {
+                                Log.d("loiketnoiserver",throwable.getMessage());
+                                Toast.makeText(getContext(),throwable.getMessage(),Toast.LENGTH_LONG).show();
+                            }
+
+                    ));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+
 
         return root;
     }
@@ -46,8 +84,9 @@ public class HomeFragment extends Fragment {
     }
 
     private void anhXa() {
-
-
+        recyclerView = binding.rvHomeSections;
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity().getApplicationContext());
+        recyclerView.setLayoutManager(layoutManager);
     }
 
 
@@ -88,5 +127,11 @@ public class HomeFragment extends Fragment {
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        compositeDisposable.clear();
     }
 }
