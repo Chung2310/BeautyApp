@@ -31,11 +31,15 @@ import com.example.beautyapp.R;
 import com.example.beautyapp.adapter.BaiVietAdapter;
 import com.example.beautyapp.databinding.FragmentHomeBinding;
 import com.example.beautyapp.model.BaiViet;
+import com.example.beautyapp.model.User;
 import com.example.beautyapp.retrofit.Api;
 import com.example.beautyapp.retrofit.RetrofitClient;
 
 import com.example.beautyapp.utils.Utils;
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,9 +52,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 public class HomeFragment extends Fragment {
 
     private FragmentHomeBinding binding;
-    private CircleImageView circleImgaeHome;
     private AppCompatButton btnHome;
-    private ViewFlipper viewFlipper;
     private RecyclerView recyclerView;
     private Api api;
     private CompositeDisposable compositeDisposable;
@@ -60,6 +62,8 @@ public class HomeFragment extends Fragment {
     private List<BaiViet> baiVietList;
     private Handler handler = new Handler();
     private BaiVietAdapter adapter;
+    private CircleImageView imageHomeFrament;
+    private AppCompatButton btnDangBai;
     private int page = 1;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -73,17 +77,38 @@ public class HomeFragment extends Fragment {
         anhXa();
         loadTT();
 
+        btnDangBai.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
 
         return root;
     }
 
 
     private void loadTT() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String userId = user.getUid();
+        compositeDisposable.add(api.getUser(userId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        userModel -> {
+                            if (userModel.isSuccess()) {
+                                Utils.user_current = userModel.getResult();
 
+                            } else {
+                                Log.d("loiload", userModel.getMessage());
+                            }
+                        },
+                        throwable -> Log.d("loiload", throwable.getMessage())
+                ));
         Glide.with(this)
                 .load(user_current.getImage())
                 .placeholder(R.drawable.android)
-                .into(circleImgaeHome);
+                .into(imageHomeFrament);
 
         addEvenLoad();
     }
@@ -92,8 +117,8 @@ public class HomeFragment extends Fragment {
     private void anhXa() {
         recyclerView = binding.rvHomeSections;
         textViewHomeFrament = binding.textViewHomeFrament;
-    
-
+        imageHomeFrament = binding.imageHomeFrament;
+        btnDangBai = binding.btnDangBai;
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity().getApplicationContext());
         recyclerView.setLayoutManager(layoutManager);
     }
@@ -132,13 +157,13 @@ public class HomeFragment extends Fragment {
                 baiVietList.remove(baiVietList.size()-1);
                 adapter.notifyItemRemoved(baiVietList.size());
                 page=page+1;
-                getData(page);
+                getData();
                 adapter.notifyDataSetChanged();
                 isLoading = false;
             }
         });
     }
-    private void getData(int page) {
+    private void getData() {
         compositeDisposable.add(api.getAllArticle()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

@@ -38,6 +38,10 @@
         android:layout_marginEnd="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
+    <ImageView
+        android:id="@+id/imageBaiViet"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">

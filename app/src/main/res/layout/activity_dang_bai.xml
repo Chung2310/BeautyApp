@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Tiêu đề bài viết -->
+        <EditText
+            android:id="@+id/editTextTitle"
+            android:hint="Nhập tiêu đề"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textCapSentences" />
+
+        <!-- Nội dung bài viết -->
+        <EditText
+            android:id="@+id/editTextContent"
+            android:hint="Nhập nội dung"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:gravity="top"
+            android:inputType="textMultiLine"
+            android:layout_marginTop="12dp" />
+
+        <!-- Ảnh minh họa -->
+        <ImageView
+            android:id="@+id/imagePreview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:scaleType="centerCrop"
+            android:background="#CCCCCC" />
+
+        <!-- Nút chọn ảnh -->
+        <Button
+            android:id="@+id/btnSelectImage"
+            android:text="Chọn ảnh"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp" />
+
+        <!-- Nút đăng bài -->
+        <Button
+            android:id="@+id/btnPost"
+            android:text="Đăng bài"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp" />
+    </LinearLayout>
+</ScrollView>

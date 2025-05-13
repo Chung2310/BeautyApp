@@ -29,6 +29,11 @@ public interface Api {
     Observable<BaiVietModel> getAllArticle(
     );
 
+    @GET("allarticle.php")
+    Observable<BaiVietModel> getAllArticleUser(
+            @Query("user_id") String user_id
+    );
+
     @GET("addarticle.php")
     Observable<MessageModel> addArticle(
             @Query("user_id") String user_id,

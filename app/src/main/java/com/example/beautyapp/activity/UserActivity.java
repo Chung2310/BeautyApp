@@ -2,11 +2,14 @@ package com.example.beautyapp.activity;
 
 import static com.example.beautyapp.utils.Utils.user_current;
 
+import static java.security.AccessController.getContext;
+
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
@@ -22,12 +25,15 @@ import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
 
 import com.bumptech.glide.Glide;
 import android.Manifest;
 import com.example.beautyapp.R;
+import com.example.beautyapp.adapter.BaiVietAdapter;
+import com.example.beautyapp.model.BaiViet;
 import com.example.beautyapp.model.ImageModel;
 import com.example.beautyapp.retrofit.Api;
 import com.example.beautyapp.retrofit.RetrofitClient;
@@ -41,9 +47,13 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -59,7 +69,14 @@ public class UserActivity extends AppCompatActivity {
     private CircleImageView circleImageView;
     private TextView CTuser_name,CTuser_email,CTuser_namsinh;
     private Api api;
+    private CompositeDisposable compositeDisposable;
     private String mediaPath;
+    private List<BaiViet> baiVietList= new ArrayList<>();
+    private BaiVietAdapter adapter;
+    boolean isLoading = false;
+    private Handler handler = new Handler();
+    private LinearLayoutManager linearLayoutManager;
+    private int page = 1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -70,7 +87,7 @@ public class UserActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-
+        compositeDisposable = new CompositeDisposable();
         api = RetrofitClient.getInstance(Utils.BASE_URL).create(Api.class);
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
@@ -82,7 +99,7 @@ public class UserActivity extends AppCompatActivity {
         anhXa();
         showInfo();
         control();
-        
+        addEvenLoad();
         
         appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
             @Override
@@ -93,6 +110,74 @@ public class UserActivity extends AppCompatActivity {
                 } else {
                     toolbarTitle.setVisibility(View.GONE); // Ẩn tiêu đề
                 }
+            }
+        });
+    }
+
+    private void getData() {
+        compositeDisposable.add(api.getAllArticleUser(user_current.getUser_id())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        baiVietModel -> {
+                            if (baiVietModel.isSuccess()){
+                                if(adapter == null){
+                                    baiVietList = baiVietModel.getResult();
+                                    adapter = new BaiVietAdapter(getApplicationContext(),baiVietList);
+                                    recyclerView.setAdapter(adapter);
+                                }
+                                else {
+                                    int vitri = baiVietList.size()-1;
+                                    int soluongadd = baiVietModel.getResult().size();
+                                    for(int i=0;i<soluongadd;i++){
+                                        baiVietList.add(baiVietModel.getResult().get(i));
+                                    }
+                                    adapter.notifyItemRangeInserted(vitri,soluongadd);
+                                }
+                            }
+                            else {
+                                isLoading = true;
+                            }
+                        }
+
+                ));
+    }
+    private void addEvenLoad() {
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+            }
+
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                if(isLoading == false){
+                    if(linearLayoutManager.findLastCompletelyVisibleItemPosition() == baiVietList.size()-1){
+                        isLoading = true;
+                        loadMore();
+                    }
+                }
+            }
+        });
+    }
+    private void loadMore(){
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                baiVietList.add(null);
+                adapter.notifyItemInserted(baiVietList.size()-1);
+            }
+        });
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                baiVietList.remove(baiVietList.size()-1);
+                adapter.notifyItemRemoved(baiVietList.size());
+                page=page+1;
+                getData();
+                adapter.notifyDataSetChanged();
+                isLoading = false;
             }
         });
     }

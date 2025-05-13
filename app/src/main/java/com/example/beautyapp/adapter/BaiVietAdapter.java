@@ -47,16 +47,24 @@ public class BaiVietAdapter extends RecyclerView.Adapter<BaiVietAdapter.MyViewHo
     public void onBindViewHolder(@NonNull BaiVietAdapter.MyViewHolder holder, int position) {
         BaiViet baiViet = itemList.get(position);
 
-        if(baiViet.getImageUser().contains("https")){
-            Glide.with(context).load(baiViet.getImageUser()).into(holder.imageItemBaiViet);
+        if(baiViet.getImage().contains("https")){
+            Glide.with(context).load(baiViet.getImage()).into(holder.imageBaiViet);
         }
         else {
-            String hinh = Utils.BASE_URL+"imagesavt/"+baiViet.getImageUser();
-            Glide.with(context).load(hinh).into(holder.imageItemBaiViet);
+            String hinh = Utils.BASE_URL+"avt/"+baiViet.getImage();
+            Glide.with(context).load(hinh).into(holder.imageBaiViet);
         }
-        holder.nameUserItemBaiViet.setText(baiViet.getNameUser());
-        holder.noidungItem.setText(baiViet.getNoiDung());
-        holder.soLikeItem.setText(baiViet.getSoLike().toString());
+
+        if(baiViet.getLinkImage().contains("https")){
+            Glide.with(context).load(baiViet.getLinkImage()).placeholder(R.drawable.android).into(holder.imageItemBaiViet);
+        }
+        else {
+            String hinh = Utils.BASE_URL+"avt/"+baiViet.getLinkImage();
+            Glide.with(context).load(hinh).placeholder(R.drawable.android).into(holder.imageItemBaiViet);
+        }
+        holder.nameUserItemBaiViet.setText(baiViet.getName());
+        holder.noidungItem.setText(baiViet.getContent());
+        holder.soLikeItem.setText(baiViet.getNumberLike().toString());
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             LocalDateTime now = LocalDateTime.now();
@@ -92,7 +100,7 @@ public class BaiVietAdapter extends RecyclerView.Adapter<BaiVietAdapter.MyViewHo
     public class MyViewHolder extends  RecyclerView.ViewHolder{
         CircleImageView imageItemBaiViet;
         TextView nameUserItemBaiViet,noidungItem,soLikeItem,timeItemBaiViet;
-        ImageView likeItem;
+        ImageView likeItem,imageBaiViet;
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
             imageItemBaiViet = itemView.findViewById(R.id.imageItemBaiViet);
@@ -101,6 +109,7 @@ public class BaiVietAdapter extends RecyclerView.Adapter<BaiVietAdapter.MyViewHo
             likeItem = itemView.findViewById(R.id.likeItem);
             soLikeItem = itemView.findViewById(R.id.soLikeItem);
             timeItemBaiViet = itemView.findViewById(R.id.timeItemBaiViet);
+            imageBaiViet = itemView.findViewById(R.id.imageBaiViet);
         }
     }
 }

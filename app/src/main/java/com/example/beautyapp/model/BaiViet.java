@@ -6,29 +6,44 @@ import java.time.LocalDateTime;
 
 public class BaiViet {
     private String id;
-    private String user_id;
-    private Double soLike;
-    private String noiDung;
+    private String userId;
+    private Double numberLike;
+    private String content;
     private LocalDateTime time;
-    private String nameUser;
-    private String imageUser;
+    private String linkImage;
+    private String name;
+    private String image;
 
-
-    public String getUser_id() {
-        return user_id;
+    public String getId() {
+        return id;
     }
 
-    public void setUser_id(String user_id) {
-        this.user_id = user_id;
+    public void setId(String id) {
+        this.id = id;
     }
 
-    public String getImageUser() {
-
-        return imageUser;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setImageUser(String imageUser) {
-        this.imageUser = imageUser;
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public Double getNumberLike() {
+        return numberLike;
+    }
+
+    public void setNumberLike(Double numberLike) {
+        this.numberLike = numberLike;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
     }
 
     public LocalDateTime getTime() {
@@ -39,36 +54,27 @@ public class BaiViet {
         this.time = time;
     }
 
-    public String getNameUser() {
-        return nameUser;
+    public String getLinkImage() {
+        return linkImage;
     }
 
-    public void setNameUser(String nameUser) {
-        this.nameUser = nameUser;
+    public void setLinkImage(String linkImage) {
+        this.linkImage = linkImage;
     }
 
-    public String getId() {
-        return id;
+    public String getName() {
+        return name;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public Double getSoLike() {
-        return soLike;
+    public String getImage() {
+        return image;
     }
 
-    public void setSoLike(Double soLike) {
-        this.soLike = soLike;
+    public void setImage(String image) {
+        this.image = image;
     }
-
-    public String getNoiDung() {
-        return noiDung;
-    }
-
-    public void setNoiDung(String noiDung) {
-        this.noiDung = noiDung;
-    }
-
 }

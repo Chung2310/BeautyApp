@@ -50,6 +50,10 @@ dependencies {
     implementation(libs.activity)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.storage)
+    implementation(libs.firebase.auth)
+    implementation(libs.credentials)
+    implementation(libs.credentials.play.services.auth)
+    implementation(libs.googleid)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
@@ -68,12 +72,9 @@ dependencies {
         implementation ("com.google.firebase:firebase-storage:20.0.1")
         implementation ("com.google.firebase:firebase-core:21.0.0")
 
-        // AR & ML Kit
-
-
         // Database
         implementation ("androidx.room:room-ktx:2.6.1")
-        implementation ("io.github.pilgr:paperdb:2.7.2")  // Yêu cầu JitPack repo
+        implementation ("io.github.pilgr:paperdb:2.7.2")
 
         // Network
         implementation ("com.squareup.retrofit2:retrofit:2.9.0")
@@ -107,6 +108,7 @@ dependencies {
 
         implementation ("androidx.navigation:navigation-fragment-ktx:2.5.3")
         implementation ("androidx.navigation:navigation-ui-ktx:2.5.3")
+
     }
 
 }

@@ -26,8 +26,6 @@ public class SplashActivity extends AppCompatActivity {
 
     private LottieAnimationView animationView;
     private TextView splashText;
-    private CompositeDisposable compositeDisposable;
-    private Api api;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,8 +35,7 @@ public class SplashActivity extends AppCompatActivity {
         // Ánh xạ view
         animationView = findViewById(R.id.animation_view);
         splashText = findViewById(R.id.splashtext);
-        api = RetrofitClient.getInstance(Utils.BASE_URL).create(Api.class);
-        compositeDisposable = new CompositeDisposable();
+
 
 
 
@@ -114,7 +111,6 @@ public class SplashActivity extends AppCompatActivity {
         if (animationView != null) {
             animationView.cancelAnimation();
         }
-        compositeDisposable.clear();
         super.onDestroy();
     }
 }
