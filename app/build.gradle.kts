@@ -100,7 +100,13 @@ dependencies {
         implementation ("androidx.camera:camera-view:1.3.0")
 
         // Material
-        implementation ("com.google.android.material:material:1.6.0")
+        implementation ("com.google.android.material:material:1.11.0")
+
+        // Dhaval
+        implementation ("com.github.dhaval2404:imagepicker:2.0")
+
+        implementation ("androidx.navigation:navigation-fragment-ktx:2.5.3")
+        implementation ("androidx.navigation:navigation-ui-ktx:2.5.3")
     }
 
 }

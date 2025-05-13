@@ -3,11 +3,29 @@ package com.example.beautyapp.model;
 import android.net.Uri;
 
 public class User {
+    private int id;
     private String user_id;
+    private String pass;
     private String name;
     private String email;
-    private String age;
-    private Uri image;
+    private String birth;
+    private String image;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getPass() {
+        return pass;
+    }
+
+    public void setPass(String pass) {
+        this.pass = pass;
+    }
 
     public String getUser_id() {
         return user_id;
@@ -33,19 +51,19 @@ public class User {
         this.email = email;
     }
 
-    public String getAge() {
-        return age;
+    public String getBirth() {
+        return birth;
     }
 
-    public void setAge(String age) {
-        this.age = age;
+    public void setBirth(String birth) {
+        this.birth = birth;
     }
 
-    public Uri getImage() {
+    public String getImage() {
         return image;
     }
 
-    public void setImage(Uri image) {
+    public void setImage(String image) {
         this.image = image;
     }
 }

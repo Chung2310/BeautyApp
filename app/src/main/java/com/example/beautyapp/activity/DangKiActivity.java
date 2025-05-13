@@ -5,6 +5,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,8 +43,9 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 public class DangKiActivity extends AppCompatActivity {
 
     private FirebaseAuth firebaseAuth;
-    private TextInputEditText txtemailDK, txtpassDK, txtpassxacnhan, txtten;
-    private AppCompatButton btnDangKy, btnAddDate;
+    private EditText txtemailDK, txtpassDK, txtpassxacnhan, txtten;
+    private CheckBox checkboxTerms;
+    private Button btnDangKy, btnAddDate;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private CompositeDisposable compositeDisposable;
     private Api api;
@@ -52,11 +56,7 @@ public class DangKiActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_dang_ki);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+
         compositeDisposable = new CompositeDisposable();
         firebaseAuth = FirebaseAuth.getInstance();
         api = RetrofitClient.getInstance(Utils
@@ -82,6 +82,11 @@ public class DangKiActivity extends AppCompatActivity {
                     return;
                 }
 
+                if(!checkboxTerms.isChecked()){
+                    Toast.makeText(getApplicationContext(), "Vui lòng chấp nhận Điều khoản và Chính sách", Toast.LENGTH_LONG).show();
+                    return;
+                }
+
                 firebaseAuth.createUserWithEmailAndPassword(email, password)
                         .addOnCompleteListener(DangKiActivity.this, new OnCompleteListener<AuthResult>() {
                             @Override
@@ -90,13 +95,13 @@ public class DangKiActivity extends AppCompatActivity {
                                     FirebaseUser user = firebaseAuth.getCurrentUser();
                                     String user_id = user.getUid();
                                     Log.d("dangky","Đăng ký thành công"+user_id);
-                                    //tạo người dùng trong mysql
+
                                     compositeDisposable.add(api.addUser(user_id,email,password,hoten,date)
                                             .subscribeOn(Schedulers.io())
                                             .observeOn(AndroidSchedulers.mainThread())
                                             .subscribe(
                                                     messageModel -> {
-
+                                                        Log.d("date",date);
                                                         if (messageModel.isSuccess()) {
                                                             Intent intent = new Intent(DangKiActivity.this, DangNhapActivity.class);
                                                             intent.putExtra("email", email);
@@ -137,6 +142,7 @@ public class DangKiActivity extends AppCompatActivity {
                         btnAddDate.setText(date);
                     }, year, month, day);
             datePickerDialog.show();
+
         });
 
     }
@@ -148,6 +154,7 @@ public class DangKiActivity extends AppCompatActivity {
         btnDangKy = findViewById(R.id.btnDangKy);
         txtten = findViewById(R.id.txtten);
         btnAddDate = findViewById(R.id.btnAddDate);
+        checkboxTerms = findViewById(R.id.checkboxTerms);
     }
 
 

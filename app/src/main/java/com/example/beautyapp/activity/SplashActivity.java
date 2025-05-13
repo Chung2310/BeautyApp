@@ -4,19 +4,30 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.airbnb.lottie.LottieAnimationView;
 import com.example.beautyapp.R;
+import com.example.beautyapp.retrofit.Api;
+import com.example.beautyapp.retrofit.RetrofitClient;
+import com.example.beautyapp.utils.Utils;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class SplashActivity extends AppCompatActivity {
 
     private LottieAnimationView animationView;
     private TextView splashText;
+    private CompositeDisposable compositeDisposable;
+    private Api api;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +37,11 @@ public class SplashActivity extends AppCompatActivity {
         // Ánh xạ view
         animationView = findViewById(R.id.animation_view);
         splashText = findViewById(R.id.splashtext);
+        api = RetrofitClient.getInstance(Utils.BASE_URL).create(Api.class);
+        compositeDisposable = new CompositeDisposable();
+
+
+
 
         // Thiết lập animation
         setupAnimation();
@@ -55,7 +71,6 @@ public class SplashActivity extends AppCompatActivity {
         FirebaseUser currentUser = auth.getCurrentUser();
 
         if (currentUser != null) {
-
             navigateToMain();
         } else {
             // Kiểm tra token lưu trữ
@@ -99,6 +114,7 @@ public class SplashActivity extends AppCompatActivity {
         if (animationView != null) {
             animationView.cancelAnimation();
         }
+        compositeDisposable.clear();
         super.onDestroy();
     }
 }

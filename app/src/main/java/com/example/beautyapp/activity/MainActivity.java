@@ -5,6 +5,7 @@ import static com.example.beautyapp.utils.Utils.user_current;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.animation.Animation;
@@ -17,6 +18,9 @@ import android.widget.ViewFlipper;
 import com.bumptech.glide.Glide;
 import com.example.beautyapp.R;
 import com.example.beautyapp.model.User;
+import com.example.beautyapp.retrofit.Api;
+import com.example.beautyapp.retrofit.RetrofitClient;
+import com.example.beautyapp.utils.Utils;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
 
@@ -35,10 +39,16 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
+
 public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityMainBinding binding;
+    private CompositeDisposable compositeDisposable;
+    private Api api;
 
 
     @Override
@@ -108,64 +118,54 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void showInfo(){
+        api = RetrofitClient.getInstance(Utils.BASE_URL).create(Api.class);
+        compositeDisposable = new CompositeDisposable();
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null) {
-            // Lấy dữ liệu từ Firebase Authentication
-            String name = user.getDisplayName() != null ? user.getDisplayName() : "Người dùng";
-            String email = user.getEmail() != null ? user.getEmail() : "Không có email";
-
-            // Cập nhật UI ngay với dữ liệu từ Firebase Authentication
-            NavigationView navigationView = binding.navView;
-            View headerView = navigationView.getHeaderView(0);
-            TextView textViewName = headerView.findViewById(R.id.txttenmain);
-            TextView textViewEmail = headerView.findViewById(R.id.txtemalmain);
-            TextView textViewAge = headerView.findViewById(R.id.txtnamsinhmain);
-            ImageView imageViewAvatar = headerView.findViewById(R.id.imageView);
-
-            imageViewAvatar.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(getApplicationContext(),UserActivity.class);
-                    startActivity(intent);
-                }
-            });
-
-            textViewName.setText(name);
-            textViewEmail.setText(email);
-
-            // Lấy dữ liệu bổ sung từ Firestore
-            FirebaseFirestore db = FirebaseFirestore.getInstance();
-            db.collection("users").document(user.getUid()).get()
-                    .addOnSuccessListener(documentSnapshot -> {
-                        if (documentSnapshot.exists()) {
-                            String fullName = documentSnapshot.getString("name");
-                            String age = documentSnapshot.getString("age");
-                            Uri photoUrl = Uri.parse(documentSnapshot.getString("image"));
-                            if (fullName != null) {
-                                textViewName.setText(fullName);
-                                textViewAge.setText("Năm sinh: "+age);
-                                if (photoUrl != null) {
-                                    Glide.with(this)
-                                            .load(photoUrl)
-                                            .placeholder(R.drawable.android)
-                                            .into(imageViewAvatar);
-                                }
+        String userId = user.getUid();
+        compositeDisposable.add(api.getUser(userId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        userModel -> {
+                            if(userModel.isSuccess()){
+                                Utils.user_current = userModel.getResult();
                                 User user1 = new User();
-                                user1.setUser_id(user.getUid());
-                                user1.setAge(age);
-                                user1.setImage(photoUrl);
-                                user1.setEmail(email);
-                                user1.setName(fullName);
-                                user_current=user1;
+                                user1 = userModel.getResult();
+                                anhXa(user1);
+                            }else {
+                                Log.d("loiload",userModel.getMessage());
                             }
+                        },throwable -> {
+                            Log.d("loiload",throwable.getMessage());
                         }
-                    })
-                    .addOnFailureListener(e -> {
-                        Toast.makeText(MainActivity.this, "Lỗi đọc dữ liệu: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                    });
-        }
+                ));
+
     }
 
+    private void anhXa(User user){
+        NavigationView navigationView = binding.navView;
+        View headerView = navigationView.getHeaderView(0);
+        TextView textViewName = headerView.findViewById(R.id.txttenmain);
+        TextView textViewEmail = headerView.findViewById(R.id.txtemalmain);
+        TextView textViewAge = headerView.findViewById(R.id.txtnamsinhmain);
+        ImageView imageViewAvatar = headerView.findViewById(R.id.imageView);
 
+        textViewName.setText(user.getName());
+        textViewEmail.setText(user.getEmail());
+        textViewAge.setText(user.getBirth());
+        Log.d("thongtin",user.getName()+user.getEmail()+ user.getBirth());
+        Glide.with(this)
+                .load(user.getImage())
+                .placeholder(R.drawable.android)
+                .into(imageViewAvatar);
+
+        imageViewAvatar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getApplicationContext(),UserActivity.class);
+                startActivity(intent);
+            }
+        });
+    }
 
 }

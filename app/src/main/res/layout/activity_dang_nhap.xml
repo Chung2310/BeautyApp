@@ -1,107 +1,100 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
-    android:background="#ffefd5"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activity.DangNhapActivity">
-    <TextView
-        android:id="@+id/txtdangnhap"
-        app:layout_constraintTop_toTopOf="parent"
-        android:text="Đăng Nhập"
-        android:gravity="center"
-        android:layout_marginTop="10dp"
-        android:textFontWeight="@integer/material_motion_duration_short_2"
-        android:padding="5dp"
-        android:textStyle="bold"
-        android:textSize="40dp"
-        android:textColor="#4097BD"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-    <com.google.android.material.textfield.TextInputLayout
-        app:layout_constraintTop_toBottomOf="@+id/txtdangnhap"
-        android:layout_marginTop="5dp"
-        android:id="@+id/email"
-        style="@style/Widget.Material3.TextInputEditText.OutlinedBox"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <com.google.android.material.textfield.TextInputEditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="textEmailAddress"
-            android:hint="Email"
-            android:id="@+id/txtemail"
-            android:drawablePadding="5dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"/>
-    </com.google.android.material.textfield.TextInputLayout>
+    android:background="@drawable/background1"
+    android:id="@+id/main"
+    android:gravity="center">
 
-    <com.google.android.material.textfield.TextInputLayout
-        app:layout_constraintTop_toBottomOf="@+id/email"
-        android:layout_marginTop="5dp"
-        android:id="@+id/txtpassword"
-        style="@style/Widget.Material3.TextInputEditText.OutlinedBox"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <com.google.android.material.textfield.TextInputEditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="textPassword"
-            android:hint="Password"
-            android:id="@+id/password"
-            android:drawablePadding="5dp"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"/>
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/btnDangNhap"
-        app:layout_constraintTop_toBottomOf="@+id/txtpassword"
-        android:layout_marginTop="10dp"
-        android:text="Đăng Nhập"
-        android:layout_marginLeft="40dp"
-        android:layout_marginRight="40dp"
-        android:textStyle="bold"
-        android:textColor="#1F3ACF"
-        android:textSize="25dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-
+    <!-- Transparent Background Panel -->
     <LinearLayout
-        android:id="@+id/viewDK"
-        app:layout_constraintTop_toBottomOf="@+id/btnDangNhap"
-        android:layout_marginTop="30dp"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <TextView
-            android:text="Nếu chưa có tài khoản? "
-            android:textSize="15dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-        <TextView
-            android:text="Đăng kí"
-            android:textSize="15dp"
-            android:textStyle="bold"
-            android:textColor="@android:color/holo_red_light"
-            android:id="@+id/txtdangki"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-    </LinearLayout>
-    <TextView
-        android:visibility="invisible"
-        android:id="@+id/resetPass"
-        app:layout_constraintTop_toBottomOf="@id/viewDK"
-        android:text="Quên mật khẩu"
-        android:textColor="#E91E63"
-        android:layout_marginTop="15dp"
-        android:gravity="center"
-        android:textSize="15dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:id="@+id/register_panel"
+        android:layout_width="320dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:layout_centerInParent="true">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="BEAUTY APP"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:textSize="25dp"
+            android:layout_gravity="center_horizontal"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Xin Chào !"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_marginTop="16dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Nhập thông tin để đăng nhập"
+            android:textColor="#DDDDDD"
+            android:textSize="14sp"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Email Field -->
+        <EditText
+            android:id="@+id/email"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/black"
+            android:hint="Email"
+            android:drawableLeft="@android:drawable/ic_dialog_email"
+            android:background="@drawable/edittext_bg"
+            android:padding="10dp"
+            android:inputType="textEmailAddress"/>
+
+        <!-- Password Field -->
+        <EditText
+            android:textColor="@color/black"
+            android:id="@+id/password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Password"
+            android:drawableLeft="@android:drawable/ic_lock_idle_lock"
+            android:background="@drawable/edittext_bg"
+            android:padding="10dp"
+            android:inputType="textPassword"
+            android:layout_marginTop="12dp"/>
+
+        <!-- Checkbox -->
+
+        <!-- Sign Up Button -->
+        <CheckBox
+            android:id="@+id/terms_checkbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="Tôi đồng ý với các Điều khoản Dịch vụ"
+            android:textColor="#FFFFFF"
+            android:textSize="13dp" />
+
+        <Button
+            android:id="@+id/signup_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Đăng nhập"
+            android:layout_marginTop="16dp"
+            android:backgroundTint="#4CAF50"
+            android:textColor="#FFFFFF"/>
+
+        <Button
+            android:id="@+id/register_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Đăng ký"
+            android:layout_marginTop="16dp"
+            android:backgroundTint="#4CAF50"
+            android:textColor="#FFFFFF"/>
+
+    </LinearLayout>
+</RelativeLayout>

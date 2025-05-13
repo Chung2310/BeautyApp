@@ -1,11 +1,17 @@
 package com.example.beautyapp.activity;
 
+import static com.example.beautyapp.R.id.checkboxTerms;
+import static com.example.beautyapp.R.id.main;
+
 import android.app.ActivityOptions;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,20 +36,16 @@ import com.google.firebase.auth.FirebaseUser;
 public class DangNhapActivity extends AppCompatActivity {
 
     private FirebaseAuth firebaseAuth;
-    private TextInputEditText txtEmail,txtPass;
-    private TextView txtDangKi;
-    private AppCompatButton btnDangNhap;
+    private EditText txtEmail,txtPass;
+    private Button btnDangNhap,btnDangKy;
+    private CheckBox terms_checkbox;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_dang_nhap);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+
         anhXa();
 
         firebaseAuth = FirebaseAuth.getInstance();
@@ -52,56 +54,61 @@ public class DangNhapActivity extends AppCompatActivity {
             txtEmail.setText(intent.getStringExtra("email"));
             txtPass.setText(intent.getStringExtra("pass"));
         }
+            btnDangNhap.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    String email = txtEmail.getText().toString();
+                    String password = txtPass.getText().toString();
+                    if (email.isEmpty() || password.isEmpty()) {
+                        Toast.makeText(getApplicationContext(), "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    if (!terms_checkbox.isChecked()){
+                        Toast.makeText(getApplicationContext(), "Vui lòng đồng ý với các Điều khoản Dịch vụ", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    firebaseAuth.signInWithEmailAndPassword(email, password)
+                            .addOnCompleteListener(DangNhapActivity.this, task -> {
+                                if (task.isSuccessful()) {
+                                    FirebaseAuth.getInstance().addAuthStateListener(firebaseAuth -> {
+                                        FirebaseUser user = firebaseAuth.getCurrentUser();
+                                        if (user != null) {
+                                            user.getIdToken(false).addOnCompleteListener(task1 -> {
+                                                if (task1.isSuccessful()) {
+                                                    String idToken = task1.getResult().getToken();
+                                                    // Lưu token vào SharedPreferences
+                                                    SharedPreferences pref = getSharedPreferences("auth", MODE_PRIVATE);
+                                                    pref.edit().putString("idToken", idToken).apply();
+                                                }
+                                            });
+                                        }
+                                    });
+                                    Intent intent = new Intent(DangNhapActivity.this, MainActivity.class);
+                                    startActivity(intent);
+                                    finish();
+                                } else {
+                                    Toast.makeText(getApplicationContext(), "Đăng nhập thất bại", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                }
+            });
 
 
-        txtDangKi.setOnClickListener(new View.OnClickListener() {
+        btnDangKy.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getApplicationContext(),DangKiActivity.class);
                 startActivity(intent);
             }
         });
-        btnDangNhap.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String email = txtEmail.getText().toString();
-                String password = txtPass.getText().toString();
-                if (email.isEmpty() || password.isEmpty()) {
-                    Toast.makeText(getApplicationContext(), "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                firebaseAuth.signInWithEmailAndPassword(email, password)
-                        .addOnCompleteListener(DangNhapActivity.this, task -> {
-                            if (task.isSuccessful()) {
-                                FirebaseAuth.getInstance().addAuthStateListener(firebaseAuth -> {
-                                    FirebaseUser user = firebaseAuth.getCurrentUser();
-                                    if (user != null) {
-                                        user.getIdToken(false).addOnCompleteListener(task1 -> {
-                                            if (task1.isSuccessful()) {
-                                                String idToken = task1.getResult().getToken();
-                                                // Lưu token vào SharedPreferences
-                                                SharedPreferences pref = getSharedPreferences("auth", MODE_PRIVATE);
-                                                pref.edit().putString("idToken", idToken).apply();
-                                            }
-                                        });
-                                    }
-                                });
-                                Intent intent = new Intent(DangNhapActivity.this, MainActivity.class);
-                                startActivity(intent);
-                                finish();
-                            } else {
-                                Toast.makeText(getApplicationContext(), "Đăng nhập thất bại", Toast.LENGTH_SHORT).show();
-                            }
-                        });
-            }
-        });
     }
 
     private void anhXa() {
-        txtEmail = findViewById(R.id.txtemail);
+        txtEmail = findViewById(R.id.email);
         txtPass = findViewById(R.id.password);
-        txtDangKi = findViewById(R.id.txtdangki);
-        btnDangNhap = findViewById(R.id.btnDangNhap);
+        btnDangNhap = findViewById(R.id.signup_button);
+        terms_checkbox = findViewById(R.id.terms_checkbox);
+        btnDangKy = findViewById(R.id.register_button);
     }
 
 }

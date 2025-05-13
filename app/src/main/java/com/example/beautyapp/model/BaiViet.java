@@ -6,11 +6,21 @@ import java.time.LocalDateTime;
 
 public class BaiViet {
     private String id;
+    private String user_id;
     private Double soLike;
     private String noiDung;
     private LocalDateTime time;
     private String nameUser;
     private String imageUser;
+
+
+    public String getUser_id() {
+        return user_id;
+    }
+
+    public void setUser_id(String user_id) {
+        this.user_id = user_id;
+    }
 
     public String getImageUser() {
 
