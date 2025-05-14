@@ -2,8 +2,7 @@ package com.example.beautyapp.activity;
 
 import static com.example.beautyapp.utils.Utils.user_current;
 
-import static java.security.AccessController.getContext;
-
+import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -20,6 +19,7 @@ import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
@@ -27,10 +27,8 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.appcompat.widget.Toolbar;
 
 import com.bumptech.glide.Glide;
-import android.Manifest;
 import com.example.beautyapp.R;
 import com.example.beautyapp.adapter.BaiVietAdapter;
 import com.example.beautyapp.model.BaiViet;
@@ -39,12 +37,9 @@ import com.example.beautyapp.retrofit.Api;
 import com.example.beautyapp.retrofit.RetrofitClient;
 import com.example.beautyapp.utils.Utils;
 import com.github.dhaval2404.imagepicker.ImagePicker;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.appbar.AppBarLayout;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -67,16 +62,18 @@ public class UserActivity extends AppCompatActivity {
     private AppBarLayout appBarLayout;
     private RecyclerView recyclerView;
     private CircleImageView circleImageView;
-    private TextView CTuser_name,CTuser_email,CTuser_namsinh;
+    private TextView CTuser_name, CTuser_email, CTuser_namsinh;
     private Api api;
     private CompositeDisposable compositeDisposable;
     private String mediaPath;
-    private List<BaiViet> baiVietList= new ArrayList<>();
+    private List<BaiViet> baiVietList = new ArrayList<>();
     private BaiVietAdapter adapter;
-    boolean isLoading = false;
+    private boolean isLoading = false;
     private Handler handler = new Handler();
     private LinearLayoutManager linearLayoutManager;
     private int page = 1;
+    private String userId = "";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -87,6 +84,7 @@ public class UserActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
         compositeDisposable = new CompositeDisposable();
         api = RetrofitClient.getInstance(Utils.BASE_URL).create(Api.class);
 
@@ -94,178 +92,160 @@ public class UserActivity extends AppCompatActivity {
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 101);
         }
-
-
+        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+        userId = firebaseAuth.getUid();
         anhXa();
+        getData(userId);
         showInfo();
         control();
         addEvenLoad();
-        
-        appBarLayout.addOnOffsetChangedListener(new AppBarLayout.OnOffsetChangedListener() {
-            @Override
-            public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
-                // Khi AppBarLayout thu gọn hoàn toàn (RecyclerView chiếm toàn màn hình)
-                if (Math.abs(verticalOffset) == appBarLayout.getTotalScrollRange()) {
-                    toolbarTitle.setVisibility(View.VISIBLE); // Hiển thị tiêu đề
-                } else {
-                    toolbarTitle.setVisibility(View.GONE); // Ẩn tiêu đề
-                }
+
+        setupAppBarScroll();
+    }
+
+    private void setupAppBarScroll() {
+        appBarLayout.addOnOffsetChangedListener((appBarLayout, verticalOffset) -> {
+            if (Math.abs(verticalOffset) == appBarLayout.getTotalScrollRange()) {
+                toolbarTitle.setVisibility(View.VISIBLE);
+            } else {
+                toolbarTitle.setVisibility(View.GONE);
             }
         });
     }
 
-    private void getData() {
-        compositeDisposable.add(api.getAllArticleUser(user_current.getUser_id())
+    private void getData(String userId) {
+        compositeDisposable.add(api.getAllArticleUser(userId)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         baiVietModel -> {
-                            if (baiVietModel.isSuccess()){
-                                if(adapter == null){
-                                    baiVietList = baiVietModel.getResult();
-                                    adapter = new BaiVietAdapter(getApplicationContext(),baiVietList);
-                                    recyclerView.setAdapter(adapter);
-                                }
-                                else {
-                                    int vitri = baiVietList.size()-1;
-                                    int soluongadd = baiVietModel.getResult().size();
-                                    for(int i=0;i<soluongadd;i++){
-                                        baiVietList.add(baiVietModel.getResult().get(i));
-                                    }
-                                    adapter.notifyItemRangeInserted(vitri,soluongadd);
-                                }
+                            if (baiVietModel.isSuccess()) {
+                                Log.d("json","1 "+userId);
+                                baiVietList = baiVietModel.getResult();
+                                Log.d("json","2 "+ baiVietModel.getResult().toString());
+                                adapter = new BaiVietAdapter(getApplicationContext(), baiVietList);
+                                recyclerView.setAdapter(adapter);
+                                linearLayoutManager = new LinearLayoutManager(this);
+                                recyclerView.setLayoutManager(linearLayoutManager);
                             }
-                            else {
-                                isLoading = true;
-                            }
-                        }
-
+                        },
+                        throwable -> Log.d("json","3 "+ throwable.getMessage())
                 ));
     }
+
     private void addEvenLoad() {
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
-            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-            }
-
-            @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                if(isLoading == false){
-                    if(linearLayoutManager.findLastCompletelyVisibleItemPosition() == baiVietList.size()-1){
-                        isLoading = true;
-                        loadMore();
-                    }
+                if (!isLoading && linearLayoutManager != null &&
+                        linearLayoutManager.findLastCompletelyVisibleItemPosition() == baiVietList.size() - 1) {
+                    isLoading = true;
+                    loadMore();
                 }
             }
         });
     }
-    private void loadMore(){
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                baiVietList.add(null);
-                adapter.notifyItemInserted(baiVietList.size()-1);
-            }
+
+    private void loadMore() {
+        handler.post(() -> {
+            baiVietList.add(null);
+            adapter.notifyItemInserted(baiVietList.size() - 1);
         });
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                baiVietList.remove(baiVietList.size()-1);
-                adapter.notifyItemRemoved(baiVietList.size());
-                page=page+1;
-                getData();
-                adapter.notifyDataSetChanged();
-                isLoading = false;
-            }
-        });
+
+        handler.postDelayed(() -> {
+            baiVietList.remove(baiVietList.size() - 1);
+            adapter.notifyItemRemoved(baiVietList.size());
+            page++;
+            getData(userId);
+            isLoading = false;
+        }, 1500);
     }
 
     private void control() {
-        circleImageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ImagePicker.with(UserActivity.this)
-                        .crop()
-                        .compress(1024)
-                        .maxResultSize(1080,1080)
-                        .start();
-            }
-        });
+        circleImageView.setOnClickListener(v -> ImagePicker.with(UserActivity.this)
+                .crop()
+                .compress(1024)
+                .maxResultSize(1080, 1080)
+                .start());
     }
-
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
         if (resultCode == RESULT_OK && data != null) {
-            mediaPath = data.getDataString();
-            upLoadFile();
+            Uri uri = data.getData();
+            if (uri != null) {
+                mediaPath = uri.toString();
+                upLoadFile(uri);
+            } else {
+                Toast.makeText(this, "Không lấy được ảnh", Toast.LENGTH_SHORT).show();
+            }
         } else {
             Toast.makeText(this, "Không có hình ảnh nào được chọn", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private String getPath(Uri uri){
-        String result;
-        Cursor cursor = getContentResolver().query(uri,null,null,null,null);
-        if(cursor == null) {
-            result = uri.getPath();
-        }
-        else {
-            cursor.moveToFirst();
-            int index = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
-            result = cursor.getString(index);
-            cursor.close();
-        }
-        return result;
-    }
 
-    private void upLoadFile() {
-        String id = String.valueOf(Utils.user_current.getId());
-        Uri uri = Uri.parse(mediaPath);  // Lấy đường dẫn từ mediaPath
-        File file = new File(getPath(uri));  // Chuyển đổi Uri thành File
-        RequestBody requestBody = RequestBody.create(MediaType.parse("avt/*"), file);  // Định dạng file tải lên là image
-        MultipartBody.Part fileupload = MultipartBody.Part.createFormData("file", file.getName(), requestBody);  // Chuẩn bị tệp để tải lên
+    private void upLoadFile(Uri uri) {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
-        // Gọi API để tải lên
-        Call<ImageModel> call = api.uploadFileAvt(fileupload, id);  // Gửi ID người dùng
-        call.enqueue(new Callback<ImageModel>() {
+        String id = user.getUid();
+        String realPath = getRealPathFromURI(uri);
+        if (realPath == null) {
+            Toast.makeText(this, "Không thể lấy đường dẫn ảnh", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        File file = new File(realPath);
+        if (!file.exists()) {
+            Toast.makeText(this, "Ảnh không tồn tại", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        RequestBody requestBody = RequestBody.create(MediaType.parse("avt/*"), file);
+        MultipartBody.Part fileupload = MultipartBody.Part.createFormData("file", file.getName(), requestBody);
+
+        api.uploadFileAvt(fileupload, id).enqueue(new Callback<ImageModel>() {
             @Override
             public void onResponse(Call<ImageModel> call, Response<ImageModel> response) {
                 ImageModel serverResponse = response.body();
-                if (serverResponse != null) {
-                    if (serverResponse.isSuccess()) {
-                        Utils.user_current.setImage(serverResponse.getResult());
-                        Log.d("loiavt",serverResponse.getMessage());
-                    } else {
-                        Log.d("loiavt",serverResponse.getMessage());
-                    }
+                if (serverResponse != null && serverResponse.isSuccess()) {
+                    user_current.setImage(serverResponse.getResult());
+                    showInfo();
                 } else {
-                    Log.d("loiavt",serverResponse.getMessage());
+                    Log.d("user","Upload thất bại: Server không trả về thành công");
                 }
             }
 
             @Override
             public void onFailure(Call<ImageModel> call, Throwable t) {
-                Log.d("loiavt", t.getMessage());  // Hiển thị lỗi nếu không thành công
+                Toast.makeText(UserActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
+    private String getRealPathFromURI(Uri contentUri) {
+        String[] proj = {MediaStore.Images.Media.DATA};
+        Cursor cursor = getContentResolver().query(contentUri, proj, null, null, null);
+        if (cursor == null) return contentUri.getPath();
+        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        String path = cursor.getString(column_index);
+        cursor.close();
+        return path;
+    }
 
     private void showInfo() {
         CTuser_name.setText(user_current.getName());
         CTuser_email.setText(user_current.getEmail());
-        CTuser_namsinh.setText("Năm Sinh: "+user_current.getBirth());
-        if(Utils.user_current.getImage().contains("https")){
-            Glide.with(getApplicationContext()).load(Utils.user_current.getImage()).placeholder(R.drawable.android).into(circleImageView);
+        CTuser_namsinh.setText("Năm Sinh: " + user_current.getBirth());
+
+        if(user_current.getImage().contains("https")){
+            Glide.with(UserActivity.this).load(user_current.getImage()).into(circleImageView);
         }
         else {
-            String hinh = Utils.BASE_URL+"avt/"+Utils.user_current.getImage();
-            Glide.with(getApplicationContext()).load(hinh).placeholder(R.drawable.android).into(circleImageView);
+            String hinh = Utils.BASE_URL+"avt/"+user_current.getImage();
+            Glide.with(UserActivity.this).load(hinh).into(circleImageView);
         }
     }
 
@@ -275,9 +255,9 @@ public class UserActivity extends AppCompatActivity {
         toolbarTitle = findViewById(R.id.toolbar_title);
         appBarLayout = findViewById(R.id.appBarLayout);
         recyclerView = findViewById(R.id.recyclerView);
-        CTuser_name=findViewById(R.id.CTuser_name);
-        CTuser_email=findViewById(R.id.CTuser_email);
-        CTuser_namsinh=findViewById(R.id.CTuser_namsinh);
+        CTuser_name = findViewById(R.id.CTuser_name);
+        CTuser_email = findViewById(R.id.CTuser_email);
+        CTuser_namsinh = findViewById(R.id.CTuser_namsinh);
         circleImageView = findViewById(R.id.profile_image_CTuser);
     }
 }

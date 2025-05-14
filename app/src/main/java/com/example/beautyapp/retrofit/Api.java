@@ -3,6 +3,7 @@ package com.example.beautyapp.retrofit;
 import com.example.beautyapp.model.BaiVietModel;
 import com.example.beautyapp.model.ImageModel;
 import com.example.beautyapp.model.MessageModel;
+import com.example.beautyapp.model.ProductModel;
 import com.example.beautyapp.model.UserModel;
 import com.google.type.DateTime;
 
@@ -18,7 +19,7 @@ import retrofit2.http.Query;
 public interface Api {
     @GET("adduser.php")
     Observable<MessageModel> addUser(
-            @Query("user_id") String user_id,
+            @Query("userId") String userId,
             @Query("email") String email,
             @Query("pass") String pass,
             @Query("name") String name,
@@ -29,14 +30,18 @@ public interface Api {
     Observable<BaiVietModel> getAllArticle(
     );
 
-    @GET("allarticle.php")
+    @GET("allproducts.php")
+    Observable<ProductModel> getAllProducts(
+    );
+
+    @GET("allarticleuser.php")
     Observable<BaiVietModel> getAllArticleUser(
-            @Query("user_id") String user_id
+            @Query("userId") String userId
     );
 
     @GET("addarticle.php")
     Observable<MessageModel> addArticle(
-            @Query("user_id") String user_id,
+            @Query("userId") String userId,
             @Query("time") String time,
             @Query("content") String content,
             @Query("numberLike") int numberLike,
@@ -45,17 +50,23 @@ public interface Api {
 
     @GET("getuser.php")
     Observable<UserModel> getUser(
-            @Query("user_id") String user_id
+            @Query("userId") String userId
     );
     @GET("updateuser.php")
     Observable<UserModel> updateUser(
-            @Query("user_id") String user_id,
+            @Query("userId") String userId,
             @Query("email") String email,
             @Query("name") String name,
             @Query("birth") String birth,
             @Query("imgae") String image
     );
+
+
     @Multipart
     @POST("uploadavt.php")
-    Call<ImageModel> uploadFileAvt(@Part MultipartBody.Part file, @Query("user_id") String user_id);
+    Call<ImageModel> uploadFileAvt(@Part MultipartBody.Part file, @Query("userId") String userId);
+
+    @Multipart
+    @POST("uploadimage.php")
+    Call<ImageModel> uploadFileImage(@Part MultipartBody.Part file, @Query("userId") String userId);
 }

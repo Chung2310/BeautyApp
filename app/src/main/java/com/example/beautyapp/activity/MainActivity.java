@@ -28,6 +28,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import io.paperdb.Paper;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
@@ -88,7 +89,8 @@ public class MainActivity extends AppCompatActivity {
             return handled;
         });
 
-        showInfo();
+        user_current = Paper.book().read("user_current");
+        anhXa(user_current);
     }
 
     @Override
@@ -108,32 +110,6 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = navHostFragment.getNavController();
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
                 || super.onSupportNavigateUp();
-    }
-
-    public void showInfo() {
-        api = RetrofitClient.getInstance(Utils.BASE_URL).create(Api.class);
-        compositeDisposable = new CompositeDisposable();
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user == null) {
-            Log.e("MainActivity", "Người dùng chưa đăng nhập");
-            return;
-        }
-        String userId = user.getUid();
-        compositeDisposable.add(api.getUser(userId)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        userModel -> {
-                            if (userModel.isSuccess()) {
-                                Utils.user_current = userModel.getResult();
-                                User user1 = userModel.getResult();
-                                anhXa(user1);
-                            } else {
-                                Log.d("loiload", userModel.getMessage());
-                            }
-                        },
-                        throwable -> Log.d("loiload", throwable.getMessage())
-                ));
     }
 
     private void anhXa(User user) {

@@ -11,13 +11,14 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.airbnb.lottie.LottieAnimationView;
 import com.example.beautyapp.R;
+import com.example.beautyapp.model.User;
 import com.example.beautyapp.retrofit.Api;
 import com.example.beautyapp.retrofit.RetrofitClient;
 import com.example.beautyapp.utils.Utils;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.FirebaseFirestore;
 
+import io.paperdb.Paper;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
@@ -26,34 +27,32 @@ public class SplashActivity extends AppCompatActivity {
 
     private LottieAnimationView animationView;
     private TextView splashText;
+    private CompositeDisposable compositeDisposable;
+    private Api api;
+    private FirebaseAuth auth;
+    private FirebaseUser currentUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
-        // Ánh xạ view
         animationView = findViewById(R.id.animation_view);
         splashText = findViewById(R.id.splashtext);
+        compositeDisposable = new CompositeDisposable();
+        api = RetrofitClient.getInstance(Utils.BASE_URL).create(Api.class);
 
-
-
-
-
-        // Thiết lập animation
+        Paper.init(this);
         setupAnimation();
 
-        // Delay 3 giây (đủ thời gian xem animation) trước khi kiểm tra đăng nhập
         new Handler().postDelayed(this::checkLoginStatus, 3000);
     }
 
     private void setupAnimation() {
-        // Có thể custom animation tại đây nếu cần
         animationView.setAnimation(R.raw.animationload);
         animationView.playAnimation();
         animationView.loop(true);
 
-        // Hiệu ứng cho text (tuỳ chọn)
         splashText.setText("Beauty App");
         splashText.setAlpha(0f);
         splashText.animate()
@@ -64,13 +63,12 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private void checkLoginStatus() {
-        FirebaseAuth auth = FirebaseAuth.getInstance();
-        FirebaseUser currentUser = auth.getCurrentUser();
+        auth = FirebaseAuth.getInstance();
+        currentUser = auth.getCurrentUser();
 
         if (currentUser != null) {
             navigateToMain();
         } else {
-            // Kiểm tra token lưu trữ
             checkSavedToken();
         }
     }
@@ -83,6 +81,7 @@ public class SplashActivity extends AppCompatActivity {
             FirebaseAuth.getInstance().signInWithCustomToken(savedToken)
                     .addOnCompleteListener(this, task -> {
                         if (task.isSuccessful()) {
+                            currentUser = FirebaseAuth.getInstance().getCurrentUser();
                             navigateToMain();
                         } else {
                             navigateToLogin();
@@ -94,9 +93,34 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private void navigateToMain() {
-        startActivity(new Intent(this, MainActivity.class));
-        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-        finish();
+        getUserAndNavigate(); // Đợi lấy user xong rồi mới chuyển màn hình
+    }
+
+    private void getUserAndNavigate() {
+        if (currentUser == null) {
+            navigateToLogin();
+            return;
+        }
+
+        String userId = currentUser.getUid();
+        compositeDisposable.add(api.getUser(userId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        userModel -> {
+                            User user = userModel.getResult();
+                            Paper.book().write("user_current", user);
+                            Utils.user_current = user;
+
+                            startActivity(new Intent(this, MainActivity.class));
+                            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                            finish();
+                        },
+                        throwable -> {
+                            Log.e("Splash", "Lỗi khi lấy user: " + throwable.getMessage());
+                            navigateToLogin();
+                        }
+                ));
     }
 
     private void navigateToLogin() {
@@ -107,10 +131,10 @@ public class SplashActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        // Dọn dẹp animation để tránh memory leak
         if (animationView != null) {
             animationView.cancelAnimation();
         }
+        compositeDisposable.clear();
         super.onDestroy();
     }
 }

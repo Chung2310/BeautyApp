@@ -26,6 +26,10 @@ import androidx.core.view.WindowInsetsCompat;
 import com.airbnb.lottie.Lottie;
 import com.airbnb.lottie.LottieAnimationView;
 import com.example.beautyapp.R;
+import com.example.beautyapp.model.User;
+import com.example.beautyapp.retrofit.Api;
+import com.example.beautyapp.retrofit.RetrofitClient;
+import com.example.beautyapp.utils.Utils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
@@ -33,12 +37,19 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import io.paperdb.Paper;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
+
 public class DangNhapActivity extends AppCompatActivity {
 
     private FirebaseAuth firebaseAuth;
     private EditText txtEmail,txtPass;
     private Button btnDangNhap,btnDangKy;
     private CheckBox terms_checkbox;
+    private CompositeDisposable compositeDisposable;
+    private Api api;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,6 +94,8 @@ public class DangNhapActivity extends AppCompatActivity {
                                             });
                                         }
                                     });
+                                    getUser(email);
+                                    Paper.book().write("user_current",Utils.user_current);
                                     Intent intent = new Intent(DangNhapActivity.this, MainActivity.class);
                                     startActivity(intent);
                                     finish();
@@ -102,7 +115,21 @@ public class DangNhapActivity extends AppCompatActivity {
             }
         });
     }
+    private void getUser(String userId){
+        compositeDisposable = new CompositeDisposable();
+        api = RetrofitClient.getInstance(Utils.BASE_URL).create(Api.class);
 
+        compositeDisposable.add(api.getUser(userId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        userModel -> {
+                            Utils.user_current = userModel.getResult();
+                        },throwable -> {
+
+                        }
+                ));
+    }
     private void anhXa() {
         txtEmail = findViewById(R.id.email);
         txtPass = findViewById(R.id.password);

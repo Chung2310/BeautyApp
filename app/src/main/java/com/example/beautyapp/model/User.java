@@ -2,7 +2,9 @@ package com.example.beautyapp.model;
 
 import android.net.Uri;
 
-public class User {
+import java.io.Serializable;
+
+public class User implements Serializable {
     private int id;
     private String user_id;
     private String pass;

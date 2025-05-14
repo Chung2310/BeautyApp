@@ -5,20 +5,15 @@ import static android.view.View.VISIBLE;
 import static androidx.camera.core.impl.utils.ContextUtil.getApplicationContext;
 import static com.example.beautyapp.utils.Utils.user_current;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.ViewFlipper;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatButton;
@@ -28,16 +23,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.beautyapp.R;
+import com.example.beautyapp.activity.DangBaiActivity;
+import com.example.beautyapp.activity.UserActivity;
 import com.example.beautyapp.adapter.BaiVietAdapter;
 import com.example.beautyapp.databinding.FragmentHomeBinding;
 import com.example.beautyapp.model.BaiViet;
-import com.example.beautyapp.model.User;
 import com.example.beautyapp.retrofit.Api;
 import com.example.beautyapp.retrofit.RetrofitClient;
-
 import com.example.beautyapp.utils.Utils;
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -45,6 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import io.paperdb.Paper;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
@@ -52,14 +46,12 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 public class HomeFragment extends Fragment {
 
     private FragmentHomeBinding binding;
-    private AppCompatButton btnHome;
     private RecyclerView recyclerView;
     private Api api;
     private CompositeDisposable compositeDisposable;
-    private TextView textViewHomeFrament;
-    boolean isLoading = false;
+    private boolean isLoading = false;
     private LinearLayoutManager linearLayoutManager;
-    private List<BaiViet> baiVietList;
+    private List<BaiViet> baiVietList = new ArrayList<>();
     private Handler handler = new Handler();
     private BaiVietAdapter adapter;
     private CircleImageView imageHomeFrament;
@@ -71,16 +63,31 @@ public class HomeFragment extends Fragment {
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
+        Paper.init(getContext());
+
+        Utils.user_current = Paper.book().read("user_current");
+
         api = RetrofitClient.getInstance(Utils.BASE_URL).create(Api.class);
         compositeDisposable = new CompositeDisposable();
 
+        imageHomeFrament = binding.imageHomeFrament;
+
+        if(user_current.getImage().contains("https")){
+            Glide.with(getContext()).load(user_current.getImage()).placeholder(R.drawable.android).into(imageHomeFrament);
+        }
+        else {
+            String hinh = Utils.BASE_URL+"avt/"+user_current.getImage();
+            Glide.with(getContext()).load(hinh).placeholder(R.drawable.android).into(imageHomeFrament);
+        }
+
         anhXa();
-        loadTT();
+        getData();
 
         btnDangBai.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                Intent intent = new Intent(getContext(), DangBaiActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -88,106 +95,66 @@ public class HomeFragment extends Fragment {
     }
 
 
-    private void loadTT() {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String userId = user.getUid();
-        compositeDisposable.add(api.getUser(userId)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(
-                        userModel -> {
-                            if (userModel.isSuccess()) {
-                                Utils.user_current = userModel.getResult();
-
-                            } else {
-                                Log.d("loiload", userModel.getMessage());
-                            }
-                        },
-                        throwable -> Log.d("loiload", throwable.getMessage())
-                ));
-        Glide.with(this)
-                .load(user_current.getImage())
-                .placeholder(R.drawable.android)
-                .into(imageHomeFrament);
-
-        addEvenLoad();
-    }
-
-
     private void anhXa() {
         recyclerView = binding.rvHomeSections;
-        textViewHomeFrament = binding.textViewHomeFrament;
         imageHomeFrament = binding.imageHomeFrament;
         btnDangBai = binding.btnDangBai;
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity().getApplicationContext());
-        recyclerView.setLayoutManager(layoutManager);
+        linearLayoutManager = new LinearLayoutManager(getActivity().getApplicationContext());
+        recyclerView.setLayoutManager(linearLayoutManager);
     }
 
     private void addEvenLoad() {
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
-            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-            }
-
-            @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
-                if(isLoading == false){
-                    if(linearLayoutManager.findLastCompletelyVisibleItemPosition() == baiVietList.size()-1){
-                        isLoading = true;
-                        loadMore();
-                    }
+                if (!isLoading && linearLayoutManager.findLastCompletelyVisibleItemPosition() == baiVietList.size() - 1) {
+                    isLoading = true;
+                    loadMore();
                 }
             }
         });
     }
 
-    private void loadMore(){
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                baiVietList.add(null);
-                adapter.notifyItemInserted(baiVietList.size()-1);
-            }
-        });
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                baiVietList.remove(baiVietList.size()-1);
-                adapter.notifyItemRemoved(baiVietList.size());
-                page=page+1;
-                getData();
-                adapter.notifyDataSetChanged();
-                isLoading = false;
-            }
-        });
+    private void loadMore() {
+        baiVietList.add(null);
+        adapter.notifyItemInserted(baiVietList.size() - 1);
+
+        handler.postDelayed(() -> {
+            baiVietList.remove(baiVietList.size() - 1);
+            adapter.notifyItemRemoved(baiVietList.size());
+
+            page++;
+            getData();
+            isLoading = false;
+        }, 1500); // giả lập loading
     }
+
     private void getData() {
         compositeDisposable.add(api.getAllArticle()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         baiVietModel -> {
-                            if(baiVietModel.isSuccess()){
-                                if(adapter == null){
+                            if (baiVietModel.isSuccess()) {
+                                Log.d("home",baiVietModel.getResult().toString());
+                                if (adapter == null) {
                                     baiVietList = baiVietModel.getResult();
-                                    adapter = new BaiVietAdapter(getContext(),baiVietList);
+                                    adapter = new BaiVietAdapter(getContext(), baiVietList);
                                     recyclerView.setAdapter(adapter);
-                                }
-                                else {
-                                    int vitri = baiVietList.size()-1;
-                                    int soluongadd = baiVietModel.getResult().size();
-                                    for(int i=0;i<soluongadd;i++){
-                                        baiVietList.add(baiVietModel.getResult().get(i));
-                                    }
-                                    adapter.notifyItemRangeInserted(vitri,soluongadd);
+                                } else {
+                                    int positionStart = baiVietList.size();
+                                    List<BaiViet> newData = baiVietModel.getResult();
+                                    baiVietList.addAll(newData);
+                                    adapter.notifyItemRangeInserted(positionStart, newData.size());
                                 }
                             } else {
-                                isLoading = true;
+                                isLoading = false;
                             }
-                        },throwable -> {
-                            Toast.makeText(getContext(),"Không thể kết nối đến sever",Toast.LENGTH_LONG).show();
+                        },
+                        throwable -> {
+                            Toast.makeText(getContext(), "Không thể kết nối đến server", Toast.LENGTH_LONG).show();
+                            isLoading = false;
                         }
                 ));
     }

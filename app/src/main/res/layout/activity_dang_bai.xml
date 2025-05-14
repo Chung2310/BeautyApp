@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#FFF0F5">
 
     <LinearLayout
+        android:layout_marginTop="10dp"
         android:orientation="vertical"
         android:padding="16dp"
         android:layout_width="match_parent"
@@ -15,7 +17,12 @@
             android:hint="Nhập tiêu đề"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="textCapSentences" />
+            android:inputType="textCapSentences"
+            android:background="@android:drawable/edit_text"
+            android:padding="10dp"
+            android:textColor="#000000"
+            android:textColorHint="#888888"
+            android:textSize="16sp" />
 
         <!-- Nội dung bài viết -->
         <EditText
@@ -25,16 +32,21 @@
             android:layout_height="200dp"
             android:gravity="top"
             android:inputType="textMultiLine"
-            android:layout_marginTop="12dp" />
+            android:layout_marginTop="12dp"
+            android:background="@android:drawable/edit_text"
+            android:padding="10dp"
+            android:textColor="#000000"
+            android:textColorHint="#888888"
+            android:textSize="16sp" />
 
         <!-- Ảnh minh họa -->
         <ImageView
             android:id="@+id/imagePreview"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
             android:layout_marginTop="12dp"
             android:scaleType="centerCrop"
-            android:background="#CCCCCC" />
+            android:background="#FFE4E1" /> <!-- Màu nền ảnh hồng pastel -->
 
         <!-- Nút chọn ảnh -->
         <Button
@@ -42,7 +54,9 @@
             android:text="Chọn ảnh"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp" />
+            android:layout_marginTop="8dp"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#FF69B4" /> <!-- Hồng đậm nhẹ -->
 
         <!-- Nút đăng bài -->
         <Button
@@ -50,6 +64,9 @@
             android:text="Đăng bài"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp" />
+            android:layout_marginTop="16dp"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#FF1493" /> <!-- Hồng đậm hơn một chút -->
+
     </LinearLayout>
 </ScrollView>

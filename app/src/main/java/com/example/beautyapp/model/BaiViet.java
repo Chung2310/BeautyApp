@@ -5,20 +5,20 @@ import com.google.type.DateTime;
 import java.time.LocalDateTime;
 
 public class BaiViet {
-    private String id;
+    private int id;
     private String userId;
     private Double numberLike;
     private String content;
-    private LocalDateTime time;
+    private String time;
     private String linkImage;
     private String name;
     private String image;
 
-    public String getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -46,11 +46,11 @@ public class BaiViet {
         this.content = content;
     }
 
-    public LocalDateTime getTime() {
+    public String getTime() {
         return time;
     }
 
-    public void setTime(LocalDateTime time) {
+    public void setTime(String time) {
         this.time = time;
     }
 
