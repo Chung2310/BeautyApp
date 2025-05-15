@@ -26,11 +26,13 @@ import com.example.beautyapp.retrofit.Api;
 import com.example.beautyapp.retrofit.RetrofitClient;
 import com.example.beautyapp.utils.Utils;
 import com.github.dhaval2404.imagepicker.ImagePicker;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.io.File;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+import io.paperdb.Paper;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
@@ -98,7 +100,6 @@ public class DangBaiActivity extends AppCompatActivity {
     }
 
     private void uploadImageThenPost(String date, String content) {
-        String id = String.valueOf(user_current.getUser_id());
         Uri uri = Uri.parse(mediaPath);
         File file = new File(getRealPathFromURI(uri));
 
@@ -107,10 +108,10 @@ public class DangBaiActivity extends AppCompatActivity {
             return;
         }
 
-        RequestBody requestBody = RequestBody.create(MediaType.parse("avt/*"), file);
+        RequestBody requestBody = RequestBody.create(MediaType.parse("images/*"), file);
         MultipartBody.Part fileupload = MultipartBody.Part.createFormData("file", file.getName(), requestBody);
 
-        api.uploadFileImage(fileupload, id).enqueue(new Callback<ImageModel>() {
+        api.uploadFileImage(fileupload).enqueue(new Callback<ImageModel>() {
             @Override
             public void onResponse(Call<ImageModel> call, Response<ImageModel> response) {
                 ImageModel serverResponse = response.body();
@@ -118,8 +119,11 @@ public class DangBaiActivity extends AppCompatActivity {
                     String filename = serverResponse.getResult();
                     user_current.setImage(filename);
 
+                    FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+                    String userId = firebaseAuth.getUid();
+
                     compositeDisposable.add(api.addArticle(
-                                    user_current.getUser_id(),
+                                    userId,
                                     date,
                                     content,
                                     0,
@@ -135,23 +139,23 @@ public class DangBaiActivity extends AppCompatActivity {
                                             startActivity(intent);
                                             finish();
                                         } else {
-                                            Toast.makeText(getApplicationContext(), "Đăng bài thất bại", Toast.LENGTH_SHORT).show();
+                                            Log.d("dangbai",messageModel.getMessage());
+
                                         }
                                     },
                                     throwable -> {
                                         Log.d("dangbai", throwable.getMessage());
-                                        Toast.makeText(getApplicationContext(), "Lỗi: " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
                                     }
                             ));
                 } else {
-                    Toast.makeText(DangBaiActivity.this, "Lỗi khi tải ảnh lên", Toast.LENGTH_SHORT).show();
+                    Log.d("dangbai","Lỗi khi tải ảnh lên");
                 }
             }
 
             @Override
             public void onFailure(Call<ImageModel> call, Throwable t) {
                 Log.d("uploadAvt", t.getMessage());
-                Toast.makeText(DangBaiActivity.this, "Lỗi kết nối máy chủ", Toast.LENGTH_SHORT).show();
+
             }
         });
     }

@@ -1,6 +1,7 @@
 package com.example.beautyapp.retrofit;
 
 import com.example.beautyapp.model.BaiVietModel;
+import com.example.beautyapp.model.ConsultantModel;
 import com.example.beautyapp.model.ImageModel;
 import com.example.beautyapp.model.MessageModel;
 import com.example.beautyapp.model.ProductModel;
@@ -32,6 +33,16 @@ public interface Api {
 
     @GET("allproducts.php")
     Observable<ProductModel> getAllProducts(
+    );
+
+    @GET("allconsultant.php")
+    Observable<ConsultantModel> getAllConsultant(
+    );
+
+    @GET("setLike.php")
+    Observable<MessageModel> setLike(
+            @Query("id") int id,
+            @Query("userId") String userId
     );
 
     @GET("allarticleuser.php")
@@ -67,6 +78,6 @@ public interface Api {
     Call<ImageModel> uploadFileAvt(@Part MultipartBody.Part file, @Query("userId") String userId);
 
     @Multipart
-    @POST("uploadimage.php")
-    Call<ImageModel> uploadFileImage(@Part MultipartBody.Part file, @Query("userId") String userId);
+    @POST("uploadimagearticle.php")
+    Call<ImageModel> uploadFileImage(@Part MultipartBody.Part file);
 }

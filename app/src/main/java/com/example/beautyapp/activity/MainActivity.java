@@ -2,6 +2,8 @@ package com.example.beautyapp.activity;
 
 import static com.example.beautyapp.utils.Utils.user_current;
 
+import static java.security.AccessController.getContext;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -124,10 +126,13 @@ public class MainActivity extends AppCompatActivity {
         textViewEmail.setText(user.getEmail());
         textViewAge.setText(user.getBirth());
         Log.d("thongtin", user.getName() + user.getEmail() + user.getBirth());
-        Glide.with(this)
-                .load(user.getImage())
-                .placeholder(R.drawable.android)
-                .into(imageViewAvatar);
+        if(user_current.getImage().contains("https")){
+            Glide.with(getApplicationContext()).load(user_current.getImage()).placeholder(R.drawable.android).into(imageViewAvatar);
+        }
+        else {
+            String hinh = Utils.BASE_URL+"avt/"+user_current.getImage();
+            Glide.with(getApplicationContext()).load(hinh).placeholder(R.drawable.android).into(imageViewAvatar);
+        }
 
         imageViewAvatar.setOnClickListener(v -> {
             Intent intent = new Intent(getApplicationContext(), UserActivity.class);
