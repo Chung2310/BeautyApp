@@ -1,5 +1,6 @@
 package com.example.beautyapp.adapter;
 
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +13,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.beautyapp.R;
+import com.example.beautyapp.activity.BookingActivity;
+import com.example.beautyapp.activity.DetailProductActivity;
+import com.example.beautyapp.interface_click.ItemClickListener;
 import com.example.beautyapp.model.Consultant;
 import com.example.beautyapp.utils.Utils;
 
@@ -19,7 +23,6 @@ import java.util.List;
 
 public class ConsultantAdapter extends RecyclerView.Adapter<ConsultantAdapter.ConsultantViewHolder> {
     private List<Consultant> consultantList;
-    private OnConsultantClickListener listener;
 
     public ConsultantAdapter(List<Consultant> consultantList) {
         this.consultantList = consultantList;
@@ -28,10 +31,6 @@ public class ConsultantAdapter extends RecyclerView.Adapter<ConsultantAdapter.Co
     public void setConsultantList(List<Consultant> consultants) {
         this.consultantList = consultants;
         notifyDataSetChanged();
-    }
-
-    public void setOnConsultantClickListener(OnConsultantClickListener listener) {
-        this.listener = listener;
     }
 
     @NonNull
@@ -43,6 +42,9 @@ public class ConsultantAdapter extends RecyclerView.Adapter<ConsultantAdapter.Co
 
     @Override
     public void onBindViewHolder(@NonNull ConsultantViewHolder holder, int position) {
+
+        ConsultantAdapter.ConsultantViewHolder myViewHolder = (ConsultantAdapter.ConsultantViewHolder) holder;
+
         Consultant consultant = consultantList.get(position);
         holder.name.setText(consultant.getName() != null ? consultant.getName() : "Không có tên");
         holder.phone.setText(consultant.getPhone() != null ? "📞 " + consultant.getPhone() : "📞 Không có số");
@@ -59,6 +61,19 @@ public class ConsultantAdapter extends RecyclerView.Adapter<ConsultantAdapter.Co
                 .error(R.drawable.android)
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(holder.image);
+
+        myViewHolder.setItemClickListener(new ItemClickListener() {
+            @Override
+            public void onClick(View view, int pos, boolean isLongClick) {
+                if(!isLongClick){
+                    Intent intent = new Intent(holder.itemView.getContext(), BookingActivity.class);
+                    intent.putExtra("consultant", consultant);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    holder.itemView.getContext().startActivity(intent);
+                }
+            }
+        });
+
     }
 
     @Override
@@ -70,9 +85,10 @@ public class ConsultantAdapter extends RecyclerView.Adapter<ConsultantAdapter.Co
         void onConsultantClick(Consultant consultant);
     }
 
-    public class ConsultantViewHolder extends RecyclerView.ViewHolder {
-        ImageView image;
-        TextView name, phone, email, address;
+    public class ConsultantViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        private ImageView image;
+        private TextView name, phone, email, address;
+        private ItemClickListener itemClickListener;
 
         public ConsultantViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -81,15 +97,16 @@ public class ConsultantAdapter extends RecyclerView.Adapter<ConsultantAdapter.Co
             phone = itemView.findViewById(R.id.tvConsultantPhone);
             email = itemView.findViewById(R.id.tvConsultantEmail);
             address = itemView.findViewById(R.id.tvConsultantAddress);
-
-            itemView.setOnClickListener(v -> {
-                if (listener != null) {
-                    int position = getAdapterPosition();
-                    if (position != RecyclerView.NO_POSITION) {
-                        listener.onConsultantClick(consultantList.get(position));
-                    }
-                }
-            });
+            itemView.setOnClickListener(this);
         }
+
+            public void setItemClickListener(ItemClickListener itemClickListener) {
+                this.itemClickListener = itemClickListener;
+            }
+            @Override
+            public void onClick(View v) {
+                itemClickListener.onClick(v ,getAdapterPosition(),false);
+            }
+
     }
 }

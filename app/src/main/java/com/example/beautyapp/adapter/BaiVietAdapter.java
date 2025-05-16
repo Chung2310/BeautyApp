@@ -34,6 +34,9 @@ public class BaiVietAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private final int VIEW_TYPE_ITEM = 0;
     private final int VIEW_TYPE_LOADING = 1;
 
+    CompositeDisposable compositeDisposable = new CompositeDisposable();
+    Api api = RetrofitClient.getInstance(Utils.BASE_URL).create(Api.class);
+    FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
     private Context context;
     private List<BaiViet> baiVietList;
 
@@ -70,7 +73,23 @@ public class BaiVietAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             viewHolder.tvSoLike.setText(String.valueOf(baiViet.getNumberLike()));
             viewHolder.tvTime.setText(baiViet.getTime());
 
-            // Ảnh người dùng
+            int currentPosition = holder.getAdapterPosition();
+            compositeDisposable.add(api.checkLike(baiViet.getId(), firebaseAuth.getUid())
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(
+                            messageModel -> {
+                                // Kiểm tra vị trí hiện tại
+                                if (holder.getAdapterPosition() == currentPosition) {
+                                    viewHolder.imgLike.setBackgroundResource(
+                                            messageModel.isSuccess() ? R.drawable.love1 : R.drawable.love
+                                    );
+                                }
+                            },
+                            throwable -> Log.e("BaiVietAdapter", "Lỗi checkLike: " + throwable.getMessage())
+                    ));
+
+
             if (baiViet.getImage() != null && !baiViet.getImage().isEmpty()) {
                 String avtUrl = baiViet.getImage().contains("https") ?
                         baiViet.getImage() :
@@ -100,10 +119,6 @@ public class BaiVietAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 @Override
                 public void onClick(View v) {
                     viewHolder.imgLike.setBackgroundResource(R.drawable.love1);
-                    CompositeDisposable compositeDisposable = new CompositeDisposable();
-                    Api api = RetrofitClient.getInstance(Utils.BASE_URL).create(Api.class);
-
-                    FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
 
                     compositeDisposable.add(api.setLike(baiViet.getId(),firebaseAuth.getUid())
                             .subscribeOn(Schedulers.io())

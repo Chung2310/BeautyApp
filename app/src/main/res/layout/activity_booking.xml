@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFF9FB"
+    android:padding="16dp"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
+
+        <!-- Card thông tin chuyên gia -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="4dp"
+            app:cardBackgroundColor="@android:color/white">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center_horizontal"
+                android:padding="16dp">
+
+                <ImageView
+                    android:id="@+id/imageConsultant"
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
+                    android:contentDescription="Consultant Image"
+                    android:scaleType="centerCrop"
+                    android:padding="4dp" />
+
+                <TextView
+                    android:id="@+id/tvConsultantName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Tên chuyên gia"
+                    android:layout_marginTop="16dp"
+                    android:textColor="#880E4F"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvConsultantSpecialty"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Chuyên ngành"
+                    android:layout_marginTop="4dp"
+                    android:textColor="#616161"
+                    android:textSize="14sp" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Section chọn ngày -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Chọn ngày tư vấn"
+            android:textStyle="bold"
+            android:textColor="#880E4F"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="8dp"
+            android:textSize="16sp"/>
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="8dp"
+            android:layout_marginBottom="8dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:background="@drawable/item_them_bai_viet"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_calender"/>
+
+                <TextView
+                    android:id="@+id/tvSelectedDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Chưa chọn ngày"
+                    android:layout_marginStart="16dp"
+                    android:textColor="#616161"
+                    android:textSize="16sp"/>
+
+                <Space
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1"/>
+
+                <Button
+                    android:id="@+id/btnSelectDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Chọn"
+                    android:textColor="#AD1457"
+                    android:background="?android:attr/selectableItemBackground"/>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Section chọn giờ -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Chọn giờ tư vấn"
+            android:textStyle="bold"
+            android:textColor="#880E4F"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="8dp"
+            android:textSize="16sp"/>
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="8dp"
+            android:layout_marginBottom="8dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:background="@drawable/item_them_bai_viet"
+                android:padding="16dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_clock"/>
+
+                <TextView
+                    android:id="@+id/tvSelectedTimeDen"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Chưa chọn giờ đến"
+                    android:layout_marginStart="16dp"
+                    android:textColor="#616161"
+                    android:textSize="16sp"/>
+
+                <Space
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1"/>
+
+                <Button
+                    android:id="@+id/btnSelectTimeDen"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Chọn"
+                    android:textColor="#AD1457"
+                    android:background="?android:attr/selectableItemBackground"/>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="8dp"
+            android:layout_marginBottom="8dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:background="@drawable/item_them_bai_viet"
+                android:padding="16dp">
+
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_clock"/>
+
+                <TextView
+                    android:id="@+id/tvSelectedTimeVe"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Chưa chọn giờ về"
+                    android:layout_marginStart="16dp"
+                    android:textColor="#616161"
+                    android:textSize="16sp"/>
+
+                <Space
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1"/>
+
+                <Button
+                    android:id="@+id/btnSelectTimeVe"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Chọn"
+                    android:textColor="#AD1457"
+                    android:background="?android:attr/selectableItemBackground"/>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Thông tin liên hệ"
+            android:textStyle="bold"
+            android:textColor="#880E4F"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="16dp"
+            android:textSize="16sp"/>
+
+        <!-- Thay TextInputLayout bằng LinearLayout và EditText -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Số điện thoại"
+                android:textColor="#AD1457"
+                android:textSize="14sp"/>
+
+            <EditText
+                android:id="@+id/etPhone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Nhập số điện thoại"
+                android:gravity="center"
+                android:inputType="phone"
+                android:textColor="#212121"
+                android:background="@drawable/item_them_bai_viet"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Địa chỉ"
+                android:textColor="#AD1457"
+                android:textSize="14sp"/>
+
+            <EditText
+                android:id="@+id/etAddress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:hint="Nhập địa chỉ"
+                android:inputType="textPostalAddress"
+                android:textColor="#212121"
+                android:background="@drawable/item_them_bai_viet"/>
+        </LinearLayout>
+
+        <!-- Xác nhận -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+
+            app:cardCornerRadius="8dp"
+            android:layout_marginBottom="8dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/item_them_bai_viet"
+                android:padding="16dp">
+
+                <CheckBox
+                    android:id="@+id/checkboxBooking"
+                    android:buttonTint="@color/pinkLightDark"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Tôi xác nhận thông tin đặt lịch là chính xác"
+                    android:textColor="#880E4F"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Chúng tôi sẽ liên hệ với bạn để xác nhận lịch hẹn"
+                    android:textColor="#616161"
+                    android:textSize="12sp"
+                    android:layout_marginTop="8dp"/>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Nút đặt lịch -->
+        <Button
+            android:id="@+id/btnBook"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:text="ĐẶT LỊCH TƯ VẤN"
+            android:textColor="#FFFFFF"
+            android:background="@color/pinkLightDark"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="32dp"
+            android:textAllCaps="false"
+            android:textSize="16sp"/>
+    </LinearLayout>
+</ScrollView>

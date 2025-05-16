@@ -124,7 +124,7 @@ public class DangNhapActivity extends AppCompatActivity {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         userModel -> {
-                            Utils.user_current = userModel.getResult();
+                            Paper.book().write("user_current", userModel.getResult());
                         },throwable -> {
 
                         }

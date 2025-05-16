@@ -1,5 +1,6 @@
 package com.example.beautyapp.ui.slideshow;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,6 +13,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.example.beautyapp.activity.BookingActivity;
 import com.example.beautyapp.adapter.ConsultantAdapter;
 import com.example.beautyapp.databinding.FragmentSlideshowBinding;
 import com.example.beautyapp.model.Consultant;
@@ -38,7 +40,6 @@ public class SlideshowFragment extends Fragment {
         binding.rvDanhSachBacSi.setHasFixedSize(true);
         binding.rvDanhSachBacSi.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.rvDanhSachBacSi.setAdapter(consultantAdapter);
-
 
 
         // Quan sát danh sách tư vấn viên

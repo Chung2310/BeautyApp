@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.beautyapp.R;
 import com.example.beautyapp.activity.DangBaiActivity;
+import com.example.beautyapp.activity.UserActivity;
 import com.example.beautyapp.adapter.BaiVietAdapter;
 import com.example.beautyapp.databinding.FragmentHomeBinding;
 import com.example.beautyapp.model.BaiViet;
@@ -57,6 +58,14 @@ public class HomeFragment extends Fragment {
         if (homeViewModel.getBaiVietList().getValue().isEmpty()) {
             homeViewModel.fetchData();
         }
+
+        binding.imageHomeFrament.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getContext(), UserActivity.class);
+                startActivity(intent);
+            }
+        });
 
         return root;
     }

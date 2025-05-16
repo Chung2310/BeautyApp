@@ -68,7 +68,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:backgroundTint="@color/pinkLightDark"
-                android:text="Đặt lịch ngay"
+                android:text="Nhấn vào chuyền gia để xem thông tin và đặt lịch ngay!!!"
                 android:textColor="@android:color/white"
                 android:textAllCaps="false"
                 app:cornerRadius="24dp"

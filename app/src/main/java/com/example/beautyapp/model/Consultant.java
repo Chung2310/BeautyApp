@@ -1,6 +1,8 @@
 package com.example.beautyapp.model;
 
-public class Consultant {
+import java.io.Serializable;
+
+public class Consultant implements Serializable {
     private int consultantId;
     private String name;
     private String imageUrl;

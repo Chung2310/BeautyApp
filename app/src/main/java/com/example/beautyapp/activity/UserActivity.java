@@ -29,6 +29,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.beautyapp.R;
 import com.example.beautyapp.adapter.BaiVietAdapter;
 import com.example.beautyapp.model.BaiViet;
@@ -57,6 +58,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class UserActivity extends AppCompatActivity {
+
     private Toolbar toolbar;
     private TextView toolbarTitle;
     private AppBarLayout appBarLayout;
@@ -92,15 +94,22 @@ public class UserActivity extends AppCompatActivity {
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 101);
         }
+
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
         userId = firebaseAuth.getUid();
+
         anhXa();
-        getData(userId);
+        setupAppBarScroll();
+
+        linearLayoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(linearLayoutManager);
+        adapter = new BaiVietAdapter(getApplicationContext(), baiVietList);
+        recyclerView.setAdapter(adapter);
+
+        getData(userId, page);
         showInfo();
         control();
         addEvenLoad();
-
-        setupAppBarScroll();
     }
 
     private void setupAppBarScroll() {
@@ -113,23 +122,21 @@ public class UserActivity extends AppCompatActivity {
         });
     }
 
-    private void getData(String userId) {
-        compositeDisposable.add(api.getAllArticleUser(userId)
+    private void getData(String userId, int page) {
+        compositeDisposable.add(api.getAllArticleUser(userId, page)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         baiVietModel -> {
                             if (baiVietModel.isSuccess()) {
-                                Log.d("json","1 "+userId);
-                                baiVietList = baiVietModel.getResult();
-                                Log.d("json","2 "+ baiVietModel.getResult().toString());
-                                adapter = new BaiVietAdapter(getApplicationContext(), baiVietList);
-                                recyclerView.setAdapter(adapter);
-                                linearLayoutManager = new LinearLayoutManager(this);
-                                recyclerView.setLayoutManager(linearLayoutManager);
+                                if (page == 1) {
+                                    baiVietList.clear();
+                                }
+                                baiVietList.addAll(baiVietModel.getResult());
+                                adapter.notifyDataSetChanged();
                             }
                         },
-                        throwable -> Log.d("json","3 "+ throwable.getMessage())
+                        throwable -> Log.d("json", "Lỗi khi lấy dữ liệu: " + throwable.getMessage())
                 ));
     }
 
@@ -156,7 +163,7 @@ public class UserActivity extends AppCompatActivity {
             baiVietList.remove(baiVietList.size() - 1);
             adapter.notifyItemRemoved(baiVietList.size());
             page++;
-            getData(userId);
+            getData(userId, page);
             isLoading = false;
         }, 1500);
     }
@@ -165,7 +172,6 @@ public class UserActivity extends AppCompatActivity {
         circleImageView.setOnClickListener(v -> ImagePicker.with(UserActivity.this)
                 .crop()
                 .compress(1024)
-                .maxResultSize(1080, 1080)
                 .start());
     }
 
@@ -185,9 +191,9 @@ public class UserActivity extends AppCompatActivity {
         }
     }
 
-
     private void upLoadFile(Uri uri) {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) return;
 
         String id = user.getUid();
         String realPath = getRealPathFromURI(uri);
@@ -211,15 +217,18 @@ public class UserActivity extends AppCompatActivity {
                 ImageModel serverResponse = response.body();
                 if (serverResponse != null && serverResponse.isSuccess()) {
                     user_current.setImage(serverResponse.getResult());
+                    Log.d("user",user_current.getImage());
                     showInfo();
-                } else {
-                    Log.d("user","Upload thất bại: Server không trả về thành công");
+
+                    page = 1;
+                    getData(userId, page);
                 }
+
             }
 
             @Override
             public void onFailure(Call<ImageModel> call, Throwable t) {
-                Toast.makeText(UserActivity.this, "Lỗi kết nối: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.d("user",t.getMessage());
             }
         });
     }
@@ -236,17 +245,31 @@ public class UserActivity extends AppCompatActivity {
     }
 
     private void showInfo() {
+
         CTuser_name.setText(user_current.getName());
         CTuser_email.setText(user_current.getEmail());
         CTuser_namsinh.setText("Năm Sinh: " + user_current.getBirth());
 
-        if(user_current.getImage().contains("https")){
-            Glide.with(UserActivity.this).load(user_current.getImage()).into(circleImageView);
+        String imageUrl = user_current.getImage();
+        if (imageUrl != null) {
+            String fullImageUrl;
+            if (imageUrl.startsWith("http")) {
+                fullImageUrl = imageUrl;
+            } else {
+                fullImageUrl = Utils.BASE_URL + "avt/" + imageUrl;
+            }
+
+            Glide.with(UserActivity.this)
+                    .load(fullImageUrl)
+                    .diskCacheStrategy(DiskCacheStrategy.NONE) // Không lưu cache trên disk
+                    .skipMemoryCache(true) // Không lưu cache trong bộ nhớ
+                    .into(circleImageView);
+        } else {
+            // Trường hợp imageUrl null thì có thể đặt ảnh mặc định
+            circleImageView.setImageResource(R.drawable.android); // thay bằng ảnh mặc định nếu có
         }
-        else {
-            String hinh = Utils.BASE_URL+"avt/"+user_current.getImage();
-            Glide.with(UserActivity.this).load(hinh).into(circleImageView);
-        }
+
+
     }
 
     private void anhXa() {
@@ -259,5 +282,12 @@ public class UserActivity extends AppCompatActivity {
         CTuser_email = findViewById(R.id.CTuser_email);
         CTuser_namsinh = findViewById(R.id.CTuser_namsinh);
         circleImageView = findViewById(R.id.profile_image_CTuser);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        handler.removeCallbacksAndMessages(null);
+        compositeDisposable.clear();
     }
 }

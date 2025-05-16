@@ -27,6 +27,17 @@ public interface Api {
             @Query("birth") String birth
     );
 
+    @GET("addbooking.php")
+    Observable<MessageModel> addBooking(
+            @Query("userId") String userId,
+            @Query("phone") String phone,
+            @Query("address") String address,
+            @Query("date") String date,
+            @Query("timeStart") String timeStart,
+            @Query("timeEnd") String timeEnd,
+            @Query("consultantId") int consultantId
+    );
+
     @GET("allarticle.php")
     Observable<BaiVietModel> getAllArticle(
     );
@@ -45,9 +56,16 @@ public interface Api {
             @Query("userId") String userId
     );
 
+    @GET("checkLike.php")
+    Observable<MessageModel> checkLike(
+            @Query("articleId") int articleId,
+            @Query("userId") String userId
+    );
+
     @GET("allarticleuser.php")
     Observable<BaiVietModel> getAllArticleUser(
-            @Query("userId") String userId
+            @Query("userId") String userId,
+            @Query("page") int page
     );
 
     @GET("addarticle.php")
