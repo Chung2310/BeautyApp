@@ -1,0 +1,102 @@
+package com.example.beautyapp.adapter;
+
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.widget.AppCompatButton;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
+import com.example.beautyapp.R;
+import com.example.beautyapp.model.Cart;
+
+import java.text.DecimalFormat;
+import java.util.List;
+
+public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder> {
+    private List<Cart> cartList;
+    private OnCartActionListener listener;
+
+    public interface OnCartActionListener {
+        void onQuantityChanged(Cart item, int newQuantity);
+        void onItemDeleted(Cart item);
+    }
+
+    public CartAdapter(List<Cart> cartList, OnCartActionListener listener) {
+        this.cartList = cartList;
+        this.listener = listener;
+    }
+
+    public void setCartList(List<Cart> list) {
+        this.cartList = list;
+        notifyDataSetChanged();
+    }
+
+    public List<Cart> getCartList() {
+        return cartList;
+    }
+
+    @NonNull
+    @Override
+    public CartViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_cart, parent, false);
+        return new CartViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull CartViewHolder holder, int position) {
+        Cart item = cartList.get(position);
+        holder.txtName.setText(item.getName());
+        DecimalFormat decimalFormat = new DecimalFormat("###,###,###");
+        holder.txtPrice.setText("Giá: "+decimalFormat.format(Double.parseDouble(String.valueOf(item.getPrice())))+ "Đ");
+        holder.txtQuantity.setText(String.valueOf(item.getQuantity()));
+
+        Glide.with(holder.itemView.getContext())
+                .load(item.getImage())
+                .into(holder.imgProduct);
+
+        holder.btnIncrease.setOnClickListener(v -> {
+            int newQuantity = item.getQuantity() + 1;
+            item.setQuantity(newQuantity);
+            notifyItemChanged(position);
+            listener.onQuantityChanged(item, newQuantity);
+        });
+
+        holder.btnDecrease.setOnClickListener(v -> {
+            if (item.getQuantity() > 1) {
+                int newQuantity = item.getQuantity() - 1;
+                item.setQuantity(newQuantity);
+                notifyItemChanged(position);
+                listener.onQuantityChanged(item, newQuantity);
+            }
+        });
+
+        holder.imgDelete.setOnClickListener(v -> listener.onItemDeleted(item));
+    }
+
+    @Override
+    public int getItemCount() {
+        return cartList != null ? cartList.size() : 0;
+    }
+
+    public static class CartViewHolder extends RecyclerView.ViewHolder {
+        ImageView imgProduct, imgDelete;
+        TextView txtName, txtPrice, txtQuantity;
+        AppCompatButton btnIncrease, btnDecrease;
+
+        public CartViewHolder(@NonNull View itemView) {
+            super(itemView);
+            imgProduct = itemView.findViewById(R.id.imgProduct);
+            imgDelete = itemView.findViewById(R.id.imgDelete);
+            txtName = itemView.findViewById(R.id.txtName);
+            txtPrice = itemView.findViewById(R.id.txtPrice);
+            txtQuantity = itemView.findViewById(R.id.txtQuantity);
+            btnIncrease = itemView.findViewById(R.id.btnIncrease);
+            btnDecrease = itemView.findViewById(R.id.btnDecrease);
+        }
+    }
+}

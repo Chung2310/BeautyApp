@@ -1,6 +1,7 @@
 package com.example.beautyapp.activity;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -22,12 +23,16 @@ import com.example.beautyapp.retrofit.Api;
 import com.example.beautyapp.retrofit.RetrofitClient;
 import com.example.beautyapp.utils.Utils;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.List;
 
+import io.paperdb.Paper;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class DetailProductActivity extends AppCompatActivity {
     private ViewPager2 viewPager;
@@ -35,6 +40,7 @@ public class DetailProductActivity extends AppCompatActivity {
     private Button buttonAddToCart;
     private CompositeDisposable compositeDisposable;
     private Api api;
+    private FirebaseAuth firebaseAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +54,7 @@ public class DetailProductActivity extends AppCompatActivity {
 
         Product product = (Product) getIntent().getSerializableExtra("product");
 
+        Paper.init(this);
 
         List<String> imageUrls = product.getImage();
 
@@ -89,6 +96,20 @@ public class DetailProductActivity extends AppCompatActivity {
             }
 
             Toast.makeText(this, "Đã thêm vào giỏ hàng", Toast.LENGTH_SHORT).show();
+
+            String userId = Paper.book().read("userId");
+
+            compositeDisposable.add(api.addCart(userId,quantity,product.getId())
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(
+                            messageModel -> {
+                                Log.d("detail_product",messageModel.getMessage());
+
+                            },throwable -> {
+                                Log.d("detail_product",throwable.getMessage());
+                            }
+                    ));
 
             bottomSheetDialog.dismiss();
         });

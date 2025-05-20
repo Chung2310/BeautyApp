@@ -1,7 +1,13 @@
 package com.example.beautyapp.activity;
 
 import android.app.DatePickerDialog;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -15,6 +21,7 @@ import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
+import androidx.core.app.NotificationCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -40,6 +47,8 @@ import io.reactivex.rxjava3.core.Scheduler;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 
+// ... các package import giữ nguyên
+
 public class DangKiActivity extends AppCompatActivity {
 
     private FirebaseAuth firebaseAuth;
@@ -49,7 +58,8 @@ public class DangKiActivity extends AppCompatActivity {
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private CompositeDisposable compositeDisposable;
     private Api api;
-    private String date;
+    private String date = "";
+    private static final String CHANNEL_ID = "my_channel_id";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,75 +69,75 @@ public class DangKiActivity extends AppCompatActivity {
 
         compositeDisposable = new CompositeDisposable();
         firebaseAuth = FirebaseAuth.getInstance();
-        api = RetrofitClient.getInstance(Utils
-                .BASE_URL).create(Api.class);
+        api = RetrofitClient.getInstance(Utils.BASE_URL).create(Api.class);
         anhXa();
 
-        btnDangKy.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String email = txtemailDK.getText().toString().trim();
-                String password = txtpassDK.getText().toString().trim();
-                String passwordXacnhan = txtpassxacnhan.getText().toString().trim();
-                String hoten = txtten.getText().toString().trim();
+        btnDangKy.setOnClickListener(v -> {
+            String email = txtemailDK.getText().toString().trim();
+            String password = txtpassDK.getText().toString().trim();
+            String passwordXacnhan = txtpassxacnhan.getText().toString().trim();
+            String hoten = txtten.getText().toString().trim();
 
-
-                if (email.isEmpty() || password.isEmpty() || passwordXacnhan.isEmpty() || hoten.isEmpty() || date.isEmpty()) {
-                    Toast.makeText(getApplicationContext(), "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_LONG).show();
-                    return;
-                }
-
-                if (!password.equals(passwordXacnhan)) {
-                    Toast.makeText(getApplicationContext(), "Mật khẩu không trùng khớp", Toast.LENGTH_LONG).show();
-                    return;
-                }
-
-                if(!checkboxTerms.isChecked()){
-                    Toast.makeText(getApplicationContext(), "Vui lòng chấp nhận Điều khoản và Chính sách", Toast.LENGTH_LONG).show();
-                    return;
-                }
-
-                firebaseAuth.createUserWithEmailAndPassword(email, password)
-                        .addOnCompleteListener(DangKiActivity.this, new OnCompleteListener<AuthResult>() {
-                            @Override
-                            public void onComplete(@NonNull Task<AuthResult> task) {
-                                if (task.isSuccessful()) {
-                                    FirebaseUser user = firebaseAuth.getCurrentUser();
-                                    String user_id = user.getUid();
-                                    Log.d("dangky","Đăng ký thành công"+user_id);
-
-                                    compositeDisposable.add(api.addUser(user_id,email,password,hoten,date)
-                                            .subscribeOn(Schedulers.io())
-                                            .observeOn(AndroidSchedulers.mainThread())
-                                            .subscribe(
-                                                    messageModel -> {
-                                                        Log.d("date",date);
-                                                        if (messageModel.isSuccess()) {
-                                                            Intent intent = new Intent(DangKiActivity.this, DangNhapActivity.class);
-                                                            intent.putExtra("email", email);
-                                                            intent.putExtra("pass", password);
-                                                            startActivity(intent);
-                                                            Log.d("dangky", messageModel.getMessage());
-                                                        } else {
-                                                            Log.d("dangky", messageModel.getMessage());
-                                                        }
-                                                    },throwable -> {
-                                                        Log.d("loidangky",throwable.getMessage());
-                                                    }
-                                            )
-                                    );
-
-
-
-
-                                    finish();
-                                } else {
-                                    String errorMessage = task.getException() != null ? task.getException().getMessage() : "Đăng ký thất bại";
-                                    Toast.makeText(getApplicationContext(), errorMessage, Toast.LENGTH_LONG).show();
-                                }
-                            }
-                        });
+            if (email.isEmpty() || password.isEmpty() || passwordXacnhan.isEmpty() || hoten.isEmpty() || date.isEmpty()) {
+                Toast.makeText(getApplicationContext(), "Vui lòng nhập đầy đủ thông tin", Toast.LENGTH_LONG).show();
+                return;
             }
+
+            if (!password.equals(passwordXacnhan)) {
+                Toast.makeText(getApplicationContext(), "Mật khẩu không trùng khớp", Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            if (!checkboxTerms.isChecked()) {
+                Toast.makeText(getApplicationContext(), "Vui lòng chấp nhận Điều khoản và Chính sách", Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            firebaseAuth.createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(DangKiActivity.this, task -> {
+                        if (task.isSuccessful()) {
+                            FirebaseUser user = firebaseAuth.getCurrentUser();
+                            if (user != null) {
+                                user.sendEmailVerification()
+                                        .addOnCompleteListener(verifyTask -> {
+                                            if (verifyTask.isSuccessful()) {
+                                                String user_id = user.getUid();
+                                                Log.d("dangky", "Đăng ký thành công " + user_id);
+
+                                                compositeDisposable.add(api.addUser(user_id, email, password, hoten, date)
+                                                        .subscribeOn(Schedulers.io())
+                                                        .observeOn(AndroidSchedulers.mainThread())
+                                                        .subscribe(
+                                                                messageModel -> {
+                                                                    Log.d("date", date);
+                                                                    if (messageModel.isSuccess()) {
+
+                                                                        showNotification("Thông báo!!!","Đăng ký thành công. Vui lòng xác minh email trước khi đăng nhập.");
+                                                                        Intent intent = new Intent(DangKiActivity.this, DangNhapActivity.class);
+                                                                        intent.putExtra("email", email);
+                                                                        intent.putExtra("pass", password);
+                                                                        startActivity(intent);
+                                                                        firebaseAuth.signOut();
+                                                                    } else {
+                                                                        Log.d("dangky", messageModel.getMessage());
+                                                                    }
+                                                                },
+                                                                throwable -> Log.d("loidangky", throwable.getMessage())
+                                                        ));
+                                            } else {
+                                                Toast.makeText(getApplicationContext(),
+                                                        "Không thể gửi email xác nhận. Vui lòng thử lại.",
+                                                        Toast.LENGTH_LONG).show();
+                                            }
+                                        });
+                            }
+                        } else {
+                            String errorMessage = task.getException() != null
+                                    ? task.getException().getMessage()
+                                    : "Đăng ký thất bại";
+                            Toast.makeText(getApplicationContext(), errorMessage, Toast.LENGTH_LONG).show();
+                        }
+                    });
         });
 
         btnAddDate.setOnClickListener(v -> {
@@ -142,9 +152,36 @@ public class DangKiActivity extends AppCompatActivity {
                         btnAddDate.setText(date);
                     }, year, month, day);
             datePickerDialog.show();
-
         });
+    }
 
+    private void showNotification(String title, String content) {
+        // Tạo NotificationManager
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        Uri soundUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.amthanhthongbao);
+
+        // Tạo NotificationChannel (chỉ cần với Android 8.0+)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                    CHANNEL_ID,
+                    "Tên kênh thông báo",
+                    NotificationManager.IMPORTANCE_DEFAULT
+            );
+            channel.setDescription("Mô tả kênh thông báo");
+            notificationManager.createNotificationChannel(channel);
+        }
+
+        // Tạo Notification
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(R.drawable.notificationbell)
+                .setContentTitle(title)
+                .setContentText(content)
+                .setSound(soundUri)
+                .setAutoCancel(true)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+
+        notificationManager.notify(1, builder.build());
     }
 
     private void anhXa() {
@@ -156,7 +193,6 @@ public class DangKiActivity extends AppCompatActivity {
         btnAddDate = findViewById(R.id.btnAddDate);
         checkboxTerms = findViewById(R.id.checkboxTerms);
     }
-
 
     @Override
     protected void onDestroy() {

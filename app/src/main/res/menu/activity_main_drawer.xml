@@ -17,6 +17,10 @@
             android:icon="@drawable/ic_menu_slideshow"
             android:title="Đặt Lịch Tư Vấn" />
         <item
+            android:id="@+id/nav_shopping_cart"
+            android:icon="@drawable/shoppingcart"
+            android:title="Giỏ Hàng"/>
+        <item
             android:id="@+id/dangxuat"
             android:title="Đăng xuất">
     </item>

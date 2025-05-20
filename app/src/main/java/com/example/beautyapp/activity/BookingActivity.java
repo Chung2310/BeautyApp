@@ -246,27 +246,14 @@ public class BookingActivity extends AppCompatActivity {
             channel.setDescription("Mô tả kênh thông báo");
             notificationManager.createNotificationChannel(channel);
         }
-        // Intent để xử lý khi bấm vào thông báo
-//        Intent intent = new Intent(this, ShowMSG.class); // Chuyển hướng về MainActivity
-//        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK );
-
-        // Intent mở màn hình quay số
-        Intent intent = new Intent(Intent.ACTION_DIAL);
-        intent.setData(Uri.parse("tel:113")); // Nhập sẵn số 113
-
-        PendingIntent pendingIntent = PendingIntent.getActivity(
-                this,
-                0,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE // Yêu cầu để chạy trên Android 12+
-        );
+        Uri soundUri = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.amthanhthongbao);
 
         // Tạo Notification
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_launcher_background) // Icon nhỏ cho thông báo (thêm icon vào res/drawable)
+                .setSmallIcon(R.drawable.notificationbell)
+                .setSound(soundUri)
                 .setContentTitle(title)                   // Tiêu đề thông báo
                 .setContentText(content)                 // Nội dung thông báo
-                .setContentIntent(pendingIntent) //bam vao thi mo activity nao
                 .setAutoCancel(true)         //bam vao thi close Thong bao
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT); // Đặt mức ưu tiên
 

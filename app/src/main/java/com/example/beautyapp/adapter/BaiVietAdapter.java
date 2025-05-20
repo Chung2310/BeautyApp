@@ -14,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.beautyapp.R;
 import com.example.beautyapp.model.BaiViet;
 import com.example.beautyapp.retrofit.Api;
@@ -73,17 +74,19 @@ public class BaiVietAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             viewHolder.tvSoLike.setText(String.valueOf(baiViet.getNumberLike()));
             viewHolder.tvTime.setText(baiViet.getTime());
 
-            int currentPosition = holder.getAdapterPosition();
             compositeDisposable.add(api.checkLike(baiViet.getId(), firebaseAuth.getUid())
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(
                             messageModel -> {
-                                // Kiểm tra vị trí hiện tại
-                                if (holder.getAdapterPosition() == currentPosition) {
-                                    viewHolder.imgLike.setBackgroundResource(
-                                            messageModel.isSuccess() ? R.drawable.love1 : R.drawable.love
-                                    );
+                                Log.d("BaiVietAdapter", baiViet.getId()+" "+ firebaseAuth.getUid());
+                                if(messageModel.isSuccess()){
+                                    viewHolder.imgLike.setBackgroundResource(R.drawable.love1);
+                                    Log.e("BaiVietAdapter", messageModel.getMessage()+messageModel.isSuccess());
+                                }
+                                else {
+                                    viewHolder.imgLike.setBackgroundResource(R.drawable.love);
+                                    Log.e("BaiVietAdapter", messageModel.getMessage()+messageModel.isSuccess());
                                 }
                             },
                             throwable -> Log.e("BaiVietAdapter", "Lỗi checkLike: " + throwable.getMessage())
@@ -95,7 +98,10 @@ public class BaiVietAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                         baiViet.getImage() :
                         Utils.BASE_URL + "avt/" + baiViet.getImage();
 
-                Glide.with(context).load(avtUrl).placeholder(R.drawable.android).into(viewHolder.imgUser);
+                Glide.with(context).load(avtUrl).placeholder(R.drawable.android)
+                        .diskCacheStrategy(DiskCacheStrategy.NONE)
+                        .skipMemoryCache(true).
+                        into(viewHolder.imgUser);
             }
 
             // Ảnh bài viết - kiểm tra có dữ liệu không
@@ -108,6 +114,8 @@ public class BaiVietAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
                 Glide.with(context)
                         .load(postImgUrl)
+                        .diskCacheStrategy(DiskCacheStrategy.NONE)
+                        .skipMemoryCache(true)
                         .placeholder(R.drawable.android)
                         .into(viewHolder.imgBaiViet);
             } else {
@@ -118,7 +126,10 @@ public class BaiVietAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             viewHolder.imgLike.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    viewHolder.imgLike.setBackgroundResource(R.drawable.love1);
+                    if (viewHolder.imgLike.getBackground().getConstantState() ==
+                            context.getResources().getDrawable(R.drawable.love1).getConstantState()) {
+                        return;
+                    }
 
                     compositeDisposable.add(api.setLike(baiViet.getId(),firebaseAuth.getUid())
                             .subscribeOn(Schedulers.io())

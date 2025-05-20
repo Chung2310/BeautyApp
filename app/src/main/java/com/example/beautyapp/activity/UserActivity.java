@@ -261,8 +261,8 @@ public class UserActivity extends AppCompatActivity {
 
             Glide.with(UserActivity.this)
                     .load(fullImageUrl)
-                    .diskCacheStrategy(DiskCacheStrategy.NONE) // Không lưu cache trên disk
-                    .skipMemoryCache(true) // Không lưu cache trong bộ nhớ
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .skipMemoryCache(true)
                     .into(circleImageView);
         } else {
             // Trường hợp imageUrl null thì có thể đặt ảnh mặc định

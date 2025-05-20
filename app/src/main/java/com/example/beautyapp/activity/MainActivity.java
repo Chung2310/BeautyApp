@@ -19,6 +19,7 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.beautyapp.R;
 import com.example.beautyapp.databinding.ActivityMainBinding;
 import com.example.beautyapp.model.User;
@@ -126,13 +127,15 @@ public class MainActivity extends AppCompatActivity {
         textViewName.setText(user.getName());
         textViewEmail.setText(user.getEmail());
         textViewAge.setText(user.getBirth());
-        Log.d("thongtin", user.getName() + user.getEmail() + user.getBirth());
+
         if(user_current.getImage().contains("https")){
-            Glide.with(getApplicationContext()).load(user_current.getImage()).placeholder(R.drawable.android).into(imageViewAvatar);
+            Glide.with(getApplicationContext()).load(user_current.getImage()).placeholder(R.drawable.android).diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .skipMemoryCache(true).into(imageViewAvatar);
         }
         else {
             String hinh = Utils.BASE_URL+"avt/"+user_current.getImage();
-            Glide.with(getApplicationContext()).load(hinh).placeholder(R.drawable.android).into(imageViewAvatar);
+            Glide.with(getApplicationContext()).load(hinh).placeholder(R.drawable.android).diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .skipMemoryCache(true).into(imageViewAvatar);
         }
 
         imageViewAvatar.setOnClickListener(v -> {

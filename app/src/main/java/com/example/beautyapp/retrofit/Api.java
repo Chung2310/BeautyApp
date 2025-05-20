@@ -1,6 +1,7 @@
 package com.example.beautyapp.retrofit;
 
 import com.example.beautyapp.model.BaiVietModel;
+import com.example.beautyapp.model.CartModel;
 import com.example.beautyapp.model.ConsultantModel;
 import com.example.beautyapp.model.ImageModel;
 import com.example.beautyapp.model.MessageModel;
@@ -77,10 +78,23 @@ public interface Api {
             @Query("linkImage") String linkImage
             );
 
+    @GET("addcart.php")
+    Observable<MessageModel> addCart(
+            @Query("userId") String userId,
+            @Query("quantity") int quantity,
+            @Query("productId") int productId
+    );
+
     @GET("getuser.php")
     Observable<UserModel> getUser(
             @Query("userId") String userId
     );
+
+    @GET("getcart.php")
+    Observable<CartModel> getCart(
+            @Query("userId") String userId
+    );
+
     @GET("updateuser.php")
     Observable<UserModel> updateUser(
             @Query("userId") String userId,

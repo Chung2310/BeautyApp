@@ -81,28 +81,35 @@ public class DangNhapActivity extends AppCompatActivity {
                     firebaseAuth.signInWithEmailAndPassword(email, password)
                             .addOnCompleteListener(DangNhapActivity.this, task -> {
                                 if (task.isSuccessful()) {
-                                    FirebaseAuth.getInstance().addAuthStateListener(firebaseAuth -> {
-                                        FirebaseUser user = firebaseAuth.getCurrentUser();
-                                        if (user != null) {
+                                    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                                    if (user != null) {
+                                        if (user.isEmailVerified()) {
+                                            // Lấy token và lưu vào SharedPreferences
                                             user.getIdToken(false).addOnCompleteListener(task1 -> {
                                                 if (task1.isSuccessful()) {
                                                     String idToken = task1.getResult().getToken();
-                                                    // Lưu token vào SharedPreferences
                                                     SharedPreferences pref = getSharedPreferences("auth", MODE_PRIVATE);
                                                     pref.edit().putString("idToken", idToken).apply();
                                                 }
                                             });
+
+                                            getUser(email);
+                                            Paper.book().write("user_current", Utils.user_current);
+                                            Intent intent = new Intent(DangNhapActivity.this, MainActivity.class);
+                                            startActivity(intent);
+                                            finish();
+                                        } else {
+                                            Toast.makeText(DangNhapActivity.this,
+                                                    "Vui lòng xác minh email trước khi đăng nhập.",
+                                                    Toast.LENGTH_LONG).show();
+                                            FirebaseAuth.getInstance().signOut();
                                         }
-                                    });
-                                    getUser(email);
-                                    Paper.book().write("user_current",Utils.user_current);
-                                    Intent intent = new Intent(DangNhapActivity.this, MainActivity.class);
-                                    startActivity(intent);
-                                    finish();
+                                    }
                                 } else {
                                     Toast.makeText(getApplicationContext(), "Đăng nhập thất bại", Toast.LENGTH_SHORT).show();
                                 }
                             });
+
                 }
             });
 

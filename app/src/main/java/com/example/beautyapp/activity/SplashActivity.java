@@ -110,6 +110,7 @@ public class SplashActivity extends AppCompatActivity {
                         userModel -> {
                             User user = userModel.getResult();
                             Paper.book().write("user_current", user);
+                            Paper.book().write("userId",user.getUser_id());
                             Utils.user_current = user;
 
                             startActivity(new Intent(this, MainActivity.class));

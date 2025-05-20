@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.beautyapp.R;
 import com.example.beautyapp.activity.DangBaiActivity;
 import com.example.beautyapp.activity.UserActivity;
@@ -79,6 +80,8 @@ public class HomeFragment extends Fragment {
             Glide.with(getContext())
                     .load(imageUrl)
                     .placeholder(R.drawable.android)
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .skipMemoryCache(true)
                     .into(binding.imageHomeFrament);
         }
     }
