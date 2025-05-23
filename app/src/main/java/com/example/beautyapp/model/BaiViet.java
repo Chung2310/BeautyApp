@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 public class BaiViet {
     private int id;
     private String userId;
-    private Double numberLike;
+    private int numberLike;
     private String content;
     private String time;
     private String linkImage;
@@ -30,11 +30,11 @@ public class BaiViet {
         this.userId = userId;
     }
 
-    public Double getNumberLike() {
+    public int getNumberLike() {
         return numberLike;
     }
 
-    public void setNumberLike(Double numberLike) {
+    public void setNumberLike(int numberLike) {
         this.numberLike = numberLike;
     }
 

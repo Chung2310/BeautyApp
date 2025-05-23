@@ -2,10 +2,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:background="@color/pinkLight"
+    android:background="@drawable/item_them_bai_viet"
+    android:layout_marginBottom="10dp"
     android:padding="12dp">
-
-
 
     <!-- Ảnh sản phẩm -->
     <ImageView

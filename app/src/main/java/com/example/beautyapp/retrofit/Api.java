@@ -1,10 +1,12 @@
 package com.example.beautyapp.retrofit;
 
 import com.example.beautyapp.model.BaiVietModel;
+import com.example.beautyapp.model.BookingModel;
 import com.example.beautyapp.model.CartModel;
 import com.example.beautyapp.model.ConsultantModel;
 import com.example.beautyapp.model.ImageModel;
 import com.example.beautyapp.model.MessageModel;
+import com.example.beautyapp.model.OrderModel;
 import com.example.beautyapp.model.ProductModel;
 import com.example.beautyapp.model.UserModel;
 import com.google.type.DateTime;
@@ -78,6 +80,15 @@ public interface Api {
             @Query("linkImage") String linkImage
             );
 
+    @GET("setorder.php")
+    Observable<MessageModel> createOrder(
+            @Query("phone") String phone,
+            @Query("totalamount") Double totalamount,
+            @Query("userId") String userId,
+            @Query("address") String address,
+            @Query("details") String details
+    );
+
     @GET("addcart.php")
     Observable<MessageModel> addCart(
             @Query("userId") String userId,
@@ -90,9 +101,24 @@ public interface Api {
             @Query("userId") String userId
     );
 
+    @GET("getbooking.php")
+    Observable<BookingModel> getBooking(
+            @Query("userId") String userId
+    );
+
     @GET("getcart.php")
     Observable<CartModel> getCart(
             @Query("userId") String userId
+    );
+
+    @GET("getorderuser.php")
+    Observable<OrderModel> getOrder(
+            @Query("userId") String userId
+    );
+
+    @GET("deletedetailcart.php")
+    Observable<MessageModel> deleteDetailCart(
+            @Query("id") int id
     );
 
     @GET("updateuser.php")

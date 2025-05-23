@@ -71,7 +71,7 @@ public class BaiVietAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
             viewHolder.tvName.setText(baiViet.getName());
             viewHolder.tvContent.setText(baiViet.getContent());
-            viewHolder.tvSoLike.setText(String.valueOf(baiViet.getNumberLike()));
+            viewHolder.tvSoLike.setText(String.valueOf((baiViet.getNumberLike())));
             viewHolder.tvTime.setText(baiViet.getTime());
 
             compositeDisposable.add(api.checkLike(baiViet.getId(), firebaseAuth.getUid())

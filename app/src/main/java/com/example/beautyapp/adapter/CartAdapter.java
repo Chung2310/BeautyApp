@@ -1,10 +1,12 @@
 package com.example.beautyapp.adapter;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatButton;
@@ -13,9 +15,16 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.beautyapp.R;
 import com.example.beautyapp.model.Cart;
+import com.example.beautyapp.retrofit.Api;
+import com.example.beautyapp.retrofit.RetrofitClient;
+import com.example.beautyapp.utils.Utils;
 
 import java.text.DecimalFormat;
 import java.util.List;
+
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder> {
     private List<Cart> cartList;
@@ -55,6 +64,8 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
         holder.txtPrice.setText("Giá: "+decimalFormat.format(Double.parseDouble(String.valueOf(item.getPrice())))+ "Đ");
         holder.txtQuantity.setText(String.valueOf(item.getQuantity()));
 
+        Log.d("cartadapter", String.valueOf(item.getId()));
+
         Glide.with(holder.itemView.getContext())
                 .load(item.getImage())
                 .into(holder.imgProduct);
@@ -75,7 +86,25 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.CartViewHolder
             }
         });
 
-        holder.imgDelete.setOnClickListener(v -> listener.onItemDeleted(item));
+        holder.imgDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                listener.onItemDeleted(item);
+                CompositeDisposable compositeDisposable = new CompositeDisposable();
+                Api api = RetrofitClient.getInstance(Utils.BASE_URL).create(Api.class);
+
+                compositeDisposable.add(api.deleteDetailCart(item.getId())
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(
+                                messageModel -> {
+                                    Toast.makeText(v.getContext(), "Đã xoá sản phẩm khỏi giỏ hàng",Toast.LENGTH_LONG).show();
+                                },throwable -> {
+                                    Log.d("cartadapter",throwable.getMessage());
+                                }
+                        ));
+            }
+        });
     }
 
     @Override

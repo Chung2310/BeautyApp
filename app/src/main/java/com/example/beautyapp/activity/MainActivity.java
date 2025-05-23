@@ -1,8 +1,5 @@
 package com.example.beautyapp.activity;
 
-import static com.example.beautyapp.utils.Utils.user_current;
-
-import static java.security.AccessController.getContext;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -40,6 +37,11 @@ public class MainActivity extends AppCompatActivity {
 
     private AppBarConfiguration mAppBarConfiguration;
     private ActivityMainBinding binding;
+    private User user;
+    private CircleImageView imageViewAvatar;
+    private CompositeDisposable compositeDisposable;
+    private Api api;
+    private FirebaseAuth firebaseAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +54,10 @@ public class MainActivity extends AppCompatActivity {
 
         Paper.init(getApplicationContext());
 
+        compositeDisposable = new CompositeDisposable();
+        api = RetrofitClient.getInstance(Utils.BASE_URL).create(Api.class);
+
+        firebaseAuth = FirebaseAuth.getInstance();
 
         DrawerLayout drawer = binding.drawerLayout;
         NavigationView navigationView = binding.navView;
@@ -66,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.nav_host_fragment);
         if (navHostFragment == null) {
-            Log.e("MainActivity", "NavHostFragment không tìm thấy với ID nav_host_fragment");
+            Log.e("mainactivity", "NavHostFragment không tìm thấy với ID nav_host_fragment");
             return; // Thoát nếu không tìm thấy
         }
         NavController navController = navHostFragment.getNavController();
@@ -93,8 +99,9 @@ public class MainActivity extends AppCompatActivity {
             return handled;
         });
 
-        user_current = Paper.book().read("user_current");
-        anhXa(user_current);
+        user = Paper.book().read("user_current");
+        anhXa(user);
+        getUser(firebaseAuth.getUid());
     }
 
     @Override
@@ -116,27 +123,31 @@ public class MainActivity extends AppCompatActivity {
                 || super.onSupportNavigateUp();
     }
 
+    void getUser(String userId){
+        compositeDisposable.add(api.getUser(userId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        userModel -> {
+                            User user1 = userModel.getResult();
+                            loadImage(user1.getImage());
+                        }
+                ));
+    }
+
     private void anhXa(User user) {
         NavigationView navigationView = binding.navView;
         View headerView = navigationView.getHeaderView(0);
         TextView textViewName = headerView.findViewById(R.id.txttenmain);
         TextView textViewEmail = headerView.findViewById(R.id.txtemalmain);
         TextView textViewAge = headerView.findViewById(R.id.txtnamsinhmain);
-        CircleImageView imageViewAvatar = headerView.findViewById(R.id.imageView);
+        imageViewAvatar = headerView.findViewById(R.id.imageView);
 
         textViewName.setText(user.getName());
         textViewEmail.setText(user.getEmail());
         textViewAge.setText(user.getBirth());
 
-        if(user_current.getImage().contains("https")){
-            Glide.with(getApplicationContext()).load(user_current.getImage()).placeholder(R.drawable.android).diskCacheStrategy(DiskCacheStrategy.NONE)
-                    .skipMemoryCache(true).into(imageViewAvatar);
-        }
-        else {
-            String hinh = Utils.BASE_URL+"avt/"+user_current.getImage();
-            Glide.with(getApplicationContext()).load(hinh).placeholder(R.drawable.android).diskCacheStrategy(DiskCacheStrategy.NONE)
-                    .skipMemoryCache(true).into(imageViewAvatar);
-        }
+        loadImage(user.getImage());
 
         imageViewAvatar.setOnClickListener(v -> {
             Intent intent = new Intent(getApplicationContext(), UserActivity.class);
@@ -144,4 +155,15 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    void loadImage(String image){
+        if(user.getImage().contains("https")){
+            Glide.with(getApplicationContext()).load(image).placeholder(R.drawable.android).diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .skipMemoryCache(true).into(imageViewAvatar);
+        }
+        else {
+            String hinh = Utils.BASE_URL+"avt/"+image;
+            Glide.with(getApplicationContext()).load(hinh).placeholder(R.drawable.android).diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .skipMemoryCache(true).into(imageViewAvatar);
+        }
+    }
 }

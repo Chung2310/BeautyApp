@@ -111,7 +111,7 @@ public class DangKiActivity extends AppCompatActivity {
                                                                 messageModel -> {
                                                                     Log.d("date", date);
                                                                     if (messageModel.isSuccess()) {
-
+                                                                        Toast.makeText(this,"Kiểm tra email để xác nhận tài khoản nhé",Toast.LENGTH_LONG).show();
                                                                         showNotification("Thông báo!!!","Đăng ký thành công. Vui lòng xác minh email trước khi đăng nhập.");
                                                                         Intent intent = new Intent(DangKiActivity.this, DangNhapActivity.class);
                                                                         intent.putExtra("email", email);

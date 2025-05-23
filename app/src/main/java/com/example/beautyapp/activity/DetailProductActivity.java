@@ -52,6 +52,8 @@ public class DetailProductActivity extends AppCompatActivity {
 
         anhXa();
 
+        firebaseAuth = FirebaseAuth.getInstance();
+
         Product product = (Product) getIntent().getSerializableExtra("product");
 
         Paper.init(this);
@@ -97,9 +99,10 @@ public class DetailProductActivity extends AppCompatActivity {
 
             Toast.makeText(this, "Đã thêm vào giỏ hàng", Toast.LENGTH_SHORT).show();
 
-            String userId = Paper.book().read("userId");
 
-            compositeDisposable.add(api.addCart(userId,quantity,product.getId())
+            Log.d("detail_product", firebaseAuth.getUid()+quantity+product.getId());
+
+            compositeDisposable.add(api.addCart(firebaseAuth.getUid(),quantity,product.getId())
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(

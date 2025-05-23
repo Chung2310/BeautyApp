@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:background="@color/pinkLight"
+    android:padding="16dp"
+    android:layout_height="wrap_content">
+
+    <EditText
+        android:layout_marginTop="12dp"
+        android:id="@+id/edtAddress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/pinkLightDark"
+        android:textColorHint="@color/pinkLightDark"
+        android:hint="Địa chỉ giao hàng"
+        android:inputType="textPostalAddress" />
+
+    <EditText
+        android:id="@+id/edtPhone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/pinkLightDark"
+        android:textColorHint="@color/pinkLightDark"
+        android:hint="Số điện thoại"
+        android:inputType="phone"
+        android:layout_marginTop="12dp" />
+
+</LinearLayout>

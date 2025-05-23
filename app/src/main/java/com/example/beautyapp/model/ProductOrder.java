@@ -1,13 +1,8 @@
 package com.example.beautyapp.model;
 
-public class Cart {
-    private int id;
-    private int productId;
-    private String name;
-    private double price;
-    private String description;
-    private String image;
-    private int quantity;
+public class ProductOrder {
+    private int id, orderId, productId, quantity;
+    private String name, price, description, image;
 
     public int getId() {
         return id;
@@ -15,6 +10,14 @@ public class Cart {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public int getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(int orderId) {
+        this.orderId = orderId;
     }
 
     public int getProductId() {
@@ -25,6 +28,14 @@ public class Cart {
         this.productId = productId;
     }
 
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
     public String getName() {
         return name;
     }
@@ -33,11 +44,11 @@ public class Cart {
         this.name = name;
     }
 
-    public double getPrice() {
+    public String getPrice() {
         return price;
     }
 
-    public void setPrice(double price) {
+    public void setPrice(String price) {
         this.price = price;
     }
 
@@ -55,13 +66,5 @@ public class Cart {
 
     public void setImage(String image) {
         this.image = image;
-    }
-
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
     }
 }
