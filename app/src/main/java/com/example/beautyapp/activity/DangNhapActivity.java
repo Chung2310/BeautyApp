@@ -112,7 +112,6 @@ public class DangNhapActivity extends AppCompatActivity {
                             if (user != null) {
                                 Paper.book().write("user_current", user);
                                 Paper.book().write("userId", user.getUser_id());
-                                Utils.user_current = user;
                             }
                         },
                         throwable -> {

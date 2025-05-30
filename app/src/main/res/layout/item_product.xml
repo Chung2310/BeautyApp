@@ -30,6 +30,7 @@
             <TextView
                 android:id="@+id/textName"
                 android:text="Tên sản phẩm"
+                android:textColor="@color/pinkLightDark"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:layout_width="wrap_content"
@@ -38,6 +39,7 @@
             <TextView
                 android:id="@+id/textPrice"
                 android:text="Giá"
+                android:textColor="#FB0101"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 

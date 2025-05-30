@@ -40,7 +40,7 @@ public class GalleryFragment extends Fragment {
         slide();
 
         productAdapter = new ProductAdapter();
-        binding.recyclerViewProducts.setLayoutManager(new GridLayoutManager(getContext(),2));
+        binding.recyclerViewProducts.setLayoutManager(new LinearLayoutManager(getContext()));
         binding.recyclerViewProducts.setAdapter(productAdapter);
 
         galleryViewModel.getProductList().observe(getViewLifecycleOwner(), products -> {

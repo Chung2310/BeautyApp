@@ -2,7 +2,9 @@
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@drawable/item_them_bai_viet"
+    app:cardBackgroundColor="@color/white"
     android:layout_margin="8dp"
     android:elevation="4dp"
     android:radius="12dp">
@@ -37,6 +39,7 @@
                     android:id="@+id/txtConsultantName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:textColor="@color/black"
                     android:text="Chuyên gia: Nguyễn Văn A"
                     android:textStyle="bold"
                     android:textSize="16sp" />
@@ -44,6 +47,7 @@
                 <TextView
                     android:id="@+id/txtConsultantPhone"
                     android:layout_width="wrap_content"
+                    android:textColor="@color/black"
                     android:layout_height="wrap_content"
                     android:text="SĐT chuyên gia: 0901234567"
                     android:textSize="14sp" />
@@ -53,6 +57,7 @@
         <!-- Thông tin lịch hẹn -->
         <TextView
             android:id="@+id/txtDate"
+            android:textColor="@color/black"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Ngày: 21/05/2025"
@@ -61,6 +66,7 @@
 
         <TextView
             android:id="@+id/txtTime"
+            android:textColor="@color/black"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Giờ: 14:00 - 15:00"
@@ -69,11 +75,13 @@
         <TextView
             android:id="@+id/txtBookingPhone"
             android:layout_width="wrap_content"
+            android:textColor="@color/black"
             android:layout_height="wrap_content"
             android:text="SĐT đặt lịch: 0987654321"
             android:textSize="14sp" />
 
         <TextView
+            android:textColor="@color/black"
             android:id="@+id/txtAddress"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

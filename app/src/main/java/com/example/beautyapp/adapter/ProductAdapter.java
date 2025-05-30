@@ -48,7 +48,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         Log.d("adapter product",p.toString());
         holder.name.setText(p.getName());
         DecimalFormat decimalFormat = new DecimalFormat("###,###,###");
-        holder.price.setText(decimalFormat.format(Double.parseDouble(p.getPrice()))+ "Đ");
+        holder.price.setText("Giá: "+decimalFormat.format(Double.parseDouble(p.getPrice()))+ "Đ");
         holder.stock.setText("Còn lại: " + p.getStock());
 
         if(p.getImage().get(0).contains("https")){

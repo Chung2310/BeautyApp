@@ -22,6 +22,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.beautyapp.R;
 
 import com.example.beautyapp.model.ImageModel;
+import com.example.beautyapp.model.User;
 import com.example.beautyapp.retrofit.Api;
 import com.example.beautyapp.retrofit.RetrofitClient;
 import com.example.beautyapp.ui.user.appointmenthistory.AppointmentHistoryFragment;
@@ -36,6 +37,7 @@ import com.google.firebase.auth.FirebaseUser;
 
 import java.io.File;
 
+import io.paperdb.Paper;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -50,6 +52,7 @@ public class UserActivity extends AppCompatActivity {
     TabLayout tabLayout;
     ViewPager2 viewPager;
     private String mediaPath, userId;
+    private User user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +60,8 @@ public class UserActivity extends AppCompatActivity {
         setContentView(R.layout.activity_user);
 
         FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+
+        user = Paper.book().read("user_current");
 
         initView();
         initData();
@@ -74,9 +79,9 @@ public class UserActivity extends AppCompatActivity {
     }
 
     private void initData() {
-        String userName = Utils.user_current.getName();
-        String email = Utils.user_current.getEmail();
-        String imageUrl = Utils.user_current.getImage();
+        String userName = user.getName();
+        String email = user.getEmail();
+        String imageUrl = user.getImage();
 
         loadImage(imageUrl);
         tvUserName.setText(userName);
@@ -210,7 +215,7 @@ public class UserActivity extends AppCompatActivity {
             public void onResponse(Call<ImageModel> call, Response<ImageModel> response) {
                 ImageModel serverResponse = response.body();
                 if (serverResponse != null && serverResponse.isSuccess()) {
-                    Utils.user_current.setImage(serverResponse.getResult());
+
                     loadImage(serverResponse.getResult());
                     Toast.makeText(UserActivity.this, "Cập nhật ảnh đại diện thành công", Toast.LENGTH_SHORT).show();
                 } else {

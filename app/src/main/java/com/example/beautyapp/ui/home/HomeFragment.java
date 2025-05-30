@@ -22,6 +22,7 @@ import com.example.beautyapp.activity.UserActivity;
 import com.example.beautyapp.adapter.BaiVietAdapter;
 import com.example.beautyapp.databinding.FragmentHomeBinding;
 import com.example.beautyapp.model.BaiViet;
+import com.example.beautyapp.model.User;
 import com.example.beautyapp.utils.Utils;
 import com.example.beautyapp.ui.home.HomeViewModel;
 
@@ -39,6 +40,7 @@ public class HomeFragment extends Fragment {
     private LinearLayoutManager linearLayoutManager;
     private boolean isLoading = false;
     private Handler handler = new Handler();
+    private User user;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -47,7 +49,7 @@ public class HomeFragment extends Fragment {
         View root = binding.getRoot();
 
         Paper.init(getContext());
-        Utils.user_current = Paper.book().read("user_current");
+        user = Paper.book().read("user_current");
 
         homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
 
@@ -72,10 +74,10 @@ public class HomeFragment extends Fragment {
     }
 
     private void setupUserInfo() {
-        if (Utils.user_current != null) {
-            String imageUrl = Utils.user_current.getImage().contains("https")
-                    ? Utils.user_current.getImage()
-                    : Utils.BASE_URL + "avt/" + Utils.user_current.getImage();
+        if (user != null) {
+            String imageUrl = user.getImage().contains("https")
+                    ? user.getImage()
+                    : Utils.BASE_URL + "avt/" + user.getImage();
 
             Glide.with(getContext())
                     .load(imageUrl)

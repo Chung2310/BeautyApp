@@ -87,7 +87,7 @@ public class ShoppingCartFragment extends Fragment {
     }
 
     private void updateTotalPrice() {
-
+        total = 0;
         for (Cart item : adapter.getCartList()) {
             total += item.getPrice() * item.getQuantity();
         }
@@ -131,7 +131,11 @@ public class ShoppingCartFragment extends Fragment {
 
                 if (address.isEmpty() || phone.isEmpty()) {
                     Toast.makeText(getContext(), "Vui lòng nhập đầy đủ địa chỉ và số điện thoại", Toast.LENGTH_SHORT).show();
-                } else {
+                }
+                else if (!phone.matches("\\d{10}")) {
+                    Toast.makeText(getContext(), "Số điện thoại phải gồm đúng 10 chữ số", Toast.LENGTH_SHORT).show();
+                }
+                else {
                     addOrder(edtAddress.getText().toString(),edtPhone.getText().toString());
                     dialog.dismiss(); // đóng dialog nếu hợp lệ
                 }

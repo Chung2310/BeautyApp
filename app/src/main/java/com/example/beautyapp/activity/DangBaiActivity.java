@@ -1,7 +1,5 @@
 package com.example.beautyapp.activity;
 
-import static com.example.beautyapp.utils.Utils.user_current;
-
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -117,7 +115,6 @@ public class DangBaiActivity extends AppCompatActivity {
                 ImageModel serverResponse = response.body();
                 if (serverResponse != null && serverResponse.isSuccess()) {
                     String filename = serverResponse.getResult();
-                    user_current.setImage(filename);
 
                     FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
                     String userId = firebaseAuth.getUid();
