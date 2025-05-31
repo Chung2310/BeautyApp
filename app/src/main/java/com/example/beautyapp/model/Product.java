@@ -10,6 +10,8 @@ public class Product implements Serializable {
     private String description;
     private int stock;
     private List<String> images;
+    private String category;
+    private String specifications;
 
     public int getId() {
         return id;
@@ -57,5 +59,29 @@ public class Product implements Serializable {
 
     public void setImage(List<String> image) {
         this.images = image;
+    }
+
+    public List<String> getImages() {
+        return images;
+    }
+
+    public void setImages(List<String> images) {
+        this.images = images;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public String getSpecifications() {
+        return specifications;
+    }
+
+    public void setSpecifications(String specifications) {
+        this.specifications = specifications;
     }
 }

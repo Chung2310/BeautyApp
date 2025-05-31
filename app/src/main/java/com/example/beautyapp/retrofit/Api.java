@@ -89,6 +89,7 @@ public interface Api {
             @Query("details") String details
     );
 
+
     @GET("addcart.php")
     Observable<MessageModel> addCart(
             @Query("userId") String userId,
@@ -99,6 +100,11 @@ public interface Api {
     @GET("getuser.php")
     Observable<UserModel> getUser(
             @Query("userId") String userId
+    );
+
+    @GET("getproductcategory.php")
+    Observable<ProductModel> getProductCategory(
+            @Query("category") String category
     );
 
     @GET("getbooking.php")

@@ -9,7 +9,7 @@
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/appBarLayout"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="300dp"
         android:background="@color/pinkLightDark"
         android:theme="@style/ThemeOverlay.MaterialComponents.Dark.ActionBar">
 
@@ -53,13 +53,22 @@
                 android:layout_margin="8dp"
                 android:queryHint="Tìm kiếm sản phẩm..." />
 
-            <!-- Danh sách sản phẩm -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerViewProducts"
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/tabLayout"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:clipToPadding="false"
-                android:padding="8dp"/>
+                android:layout_height="wrap_content"
+                app:tabIndicatorColor="@color/pinkLightDark"
+                app:tabSelectedTextColor="@color/pinkLightDark"
+                app:tabMode="scrollable"
+                app:tabGravity="fill"
+                app:tabTextColor="@color/black" />
+
+            <!-- ViewPager2 để hiển thị danh sách theo tab -->
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/viewPager"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
         </LinearLayout>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

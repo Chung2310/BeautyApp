@@ -36,7 +36,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class DetailProductActivity extends AppCompatActivity {
     private ViewPager2 viewPager;
-    private TextView textProductName,textProductPrice,textProductStock,textProductDescription;
+    private TextView textProductName,textProductPrice,textProductStock,textProductDescription,textProductSpecifications;
     private Button buttonAddToCart;
     private CompositeDisposable compositeDisposable;
     private Api api;
@@ -127,6 +127,7 @@ public class DetailProductActivity extends AppCompatActivity {
         textProductPrice.setText("Giá: "+decimalFormat.format(Double.parseDouble(product.getPrice()))+ "Đ");
         textProductStock.setText("Còn lại: "+product.getStock());
         textProductDescription.setText("Mô tả: "+product.getDescription());
+        textProductSpecifications.setText("Quy cách: "+product.getSpecifications());
     }
 
     private void anhXa() {
@@ -136,5 +137,6 @@ public class DetailProductActivity extends AppCompatActivity {
         textProductStock = findViewById(R.id.textProductStock);
         textProductDescription = findViewById(R.id.textProductDescription);
         buttonAddToCart = findViewById(R.id.buttonAddToCart);
+        textProductSpecifications = findViewById(R.id.textProductSpecifications);
     }
 }

@@ -14,63 +14,61 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.beautyapp.R;
 import com.example.beautyapp.adapter.ProductAdapter;
+import com.example.beautyapp.adapter.ProductCategoryPagerAdapter;
 import com.example.beautyapp.databinding.FragmentGalleryBinding;
+import com.google.android.material.tabs.TabLayoutMediator;
 
 public class GalleryFragment extends Fragment {
 
     private FragmentGalleryBinding binding;
-    private GalleryViewModel galleryViewModel;
-    private ProductAdapter productAdapter;
+    private ProductCategoryPagerAdapter pagerAdapter;
 
+    @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         binding = FragmentGalleryBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        galleryViewModel = new ViewModelProvider(this).get(GalleryViewModel.class);
+        pagerAdapter = new ProductCategoryPagerAdapter(this);
+        binding.viewPager.setAdapter(pagerAdapter);
 
-        // Khởi tạo adapter và layout
-        productAdapter = new ProductAdapter();
-        binding.recyclerViewProducts.setLayoutManager(new LinearLayoutManager(getContext()));
-        binding.recyclerViewProducts.setAdapter(productAdapter);
+        new TabLayoutMediator(binding.tabLayout, binding.viewPager,
+                (tab, position) -> {
+                    switch (position) {
+                        case 0:
+                            tab.setText("Tất cả");
+                            break;
+                        case 1:
+                            tab.setText("Chăm sóc da mặt");
+                            break;
+                        case 2:
+                            tab.setText("Chăm sóc cơ thể");
+                            break;
+                        case 3:
+                            tab.setText("Giải pháp làn da");
+                            break;
+                        case 4:
+                            tab.setText("Chăm sóc tóc - da đầu");
+                            break;
+                        case 5:
+                            tab.setText("Mỹ phẩm trang điểm");
+                            break;
+                    }
+                }).attach();
 
-        // Quan sát dữ liệu từ ViewModel
-        galleryViewModel.getProductList().observe(getViewLifecycleOwner(), products -> {
-            productAdapter.setProductList(products);
-            binding.swipeRefreshLayout.setRefreshing(false);
-        });
+        slide();
 
-        // Tìm kiếm sản phẩm
         binding.searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                productAdapter.filter(query);
+                pagerAdapter.filter(query);
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                productAdapter.filter(newText);
+                pagerAdapter.filter(newText);
                 return true;
-            }
-        });
-
-        // Kéo để làm mới danh sách
-        binding.swipeRefreshLayout.setOnRefreshListener(() -> {
-            galleryViewModel.loadProducts();
-        });
-
-        // Flipper và ẩn/hiện khi cuộn
-        slide();
-        binding.recyclerViewProducts.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                if (dy > 20) {
-                    binding.viewFlipper.setVisibility(View.GONE);
-                } else if (dy < -20) {
-                    binding.viewFlipper.setVisibility(View.VISIBLE);
-                }
             }
         });
 

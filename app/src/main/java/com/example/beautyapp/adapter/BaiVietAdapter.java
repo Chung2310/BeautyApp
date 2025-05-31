@@ -173,10 +173,6 @@ public class BaiVietAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 viewHolder.imgLike.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        if (viewHolder.imgLike.getBackground().getConstantState() ==
-                                context.getResources().getDrawable(R.drawable.love1).getConstantState()) {
-                            return;
-                        }
 
                         compositeDisposable.add(api.setLike(baiViet.getId(),firebaseAuth.getUid())
                                 .subscribeOn(Schedulers.io())
@@ -185,6 +181,7 @@ public class BaiVietAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                                         messageModel -> {
                                             isLike = true;
                                             baiViet.setNumberLike(baiViet.getNumberLike()+1);
+                                            viewHolder.imgLike.setBackgroundResource(R.drawable.love1);
                                             viewHolder.tvSoLike.setText(String.valueOf(baiViet.getNumberLike()));
                                             Log.d("baivietadapter","done");
                                         }, throwable -> {
