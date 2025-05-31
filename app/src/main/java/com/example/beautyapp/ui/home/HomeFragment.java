@@ -1,8 +1,11 @@
 package com.example.beautyapp.ui.home;
 
+import static androidx.camera.core.impl.utils.ContextUtil.getApplicationContext;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,13 +26,20 @@ import com.example.beautyapp.adapter.BaiVietAdapter;
 import com.example.beautyapp.databinding.FragmentHomeBinding;
 import com.example.beautyapp.model.BaiViet;
 import com.example.beautyapp.model.User;
+import com.example.beautyapp.retrofit.Api;
+import com.example.beautyapp.retrofit.RetrofitClient;
 import com.example.beautyapp.utils.Utils;
 import com.example.beautyapp.ui.home.HomeViewModel;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import io.paperdb.Paper;
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
+import io.reactivex.rxjava3.disposables.CompositeDisposable;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 
 public class HomeFragment extends Fragment {
 
@@ -40,7 +50,10 @@ public class HomeFragment extends Fragment {
     private LinearLayoutManager linearLayoutManager;
     private boolean isLoading = false;
     private Handler handler = new Handler();
+    private CompositeDisposable compositeDisposable;
+    private Api api;
     private User user;
+    private FirebaseAuth firebaseAuth;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -49,11 +62,14 @@ public class HomeFragment extends Fragment {
         View root = binding.getRoot();
 
         Paper.init(getContext());
-        user = Paper.book().read("user_current");
 
         homeViewModel = new ViewModelProvider(this).get(HomeViewModel.class);
 
-        setupUserInfo();
+        compositeDisposable = new CompositeDisposable();
+        api = RetrofitClient.getInstance(Utils.BASE_URL).create(Api.class);
+        firebaseAuth = FirebaseAuth.getInstance();
+
+        getUser(firebaseAuth.getUid());
         setupRecyclerView();
         setupObservers();
         setupEvents();
@@ -73,19 +89,35 @@ public class HomeFragment extends Fragment {
         return root;
     }
 
-    private void setupUserInfo() {
-        if (user != null) {
-            String imageUrl = user.getImage().contains("https")
-                    ? user.getImage()
-                    : Utils.BASE_URL + "avt/" + user.getImage();
-
-            Glide.with(getContext())
-                    .load(imageUrl)
-                    .placeholder(R.drawable.android)
-                    .diskCacheStrategy(DiskCacheStrategy.NONE)
-                    .skipMemoryCache(true)
-                    .into(binding.imageHomeFrament);
+    void loadImage(String image) {
+        String imageUrl;
+        if (image != null && image.contains("https")) {
+            imageUrl = image;
+        } else {
+            imageUrl = Utils.BASE_URL + "avt/" + image;
         }
+
+        Glide.with(getContext())
+                .load(imageUrl)
+                .placeholder(R.drawable.android)
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .skipMemoryCache(true)
+                .into(binding.imageHomeFrament);
+    }
+
+
+    void getUser(String userId){
+        compositeDisposable.add(api.getUser(userId)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        userModel -> {
+                            user = userModel.getResult();
+                            loadImage(user.getImage());
+                            Log.d("anhmain",user.getImage());
+                            Paper.book().write("user_current",user);
+                        }
+                ));
     }
 
     private void setupRecyclerView() {

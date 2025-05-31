@@ -1,20 +1,19 @@
 package com.example.beautyapp.activity;
 
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.beautyapp.R;
@@ -25,7 +24,6 @@ import com.example.beautyapp.retrofit.RetrofitClient;
 import com.example.beautyapp.utils.Utils;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.paperdb.Paper;
@@ -81,6 +79,9 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, mAppBarConfiguration);
         NavigationUI.setupWithNavController(navigationView, navController);
 
+        // Lấy thông tin user rồi xử lý UI trong callback
+        getUser(firebaseAuth.getUid());
+
         // Xử lý sự kiện chọn item trong NavigationView
         navigationView.setNavigationItemSelectedListener(item -> {
             if (item.getItemId() == R.id.dangxuat) {
@@ -99,10 +100,6 @@ public class MainActivity extends AppCompatActivity {
             }
             return handled;
         });
-
-        user = Paper.book().read("user_current");
-        anhXa(user);
-        getUser(firebaseAuth.getUid());
     }
 
     @Override
@@ -130,8 +127,19 @@ public class MainActivity extends AppCompatActivity {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         userModel -> {
-                            User user1 = userModel.getResult();
-                            loadImage(user1.getImage());
+                            user = userModel.getResult();
+                            Log.d("anhmain", user.getImage());
+
+                            // Ẩn menu admin nếu role là user hoặc consultant
+                            if (user.getRole().equals("user") || user.getRole().equals("consultant")) {
+                                binding.navView.getMenu().findItem(R.id.admin).setVisible(false);
+                            }
+                            anhXa(user);
+                            loadImage(user.getImage());
+
+                        },
+                        throwable -> {
+                            Log.e("MainActivity", "Lỗi lấy user: " + throwable.getMessage());
                         }
                 ));
     }
@@ -156,15 +164,20 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    void loadImage(String image){
-        if(user.getImage().contains("https")){
-            Glide.with(getApplicationContext()).load(image).placeholder(R.drawable.android).diskCacheStrategy(DiskCacheStrategy.NONE)
-                    .skipMemoryCache(true).into(imageViewAvatar);
+    void loadImage(String image) {
+
+        String imageUrl;
+        if (image != null && image.contains("https")) {
+            imageUrl = image;
+        } else {
+            imageUrl = Utils.BASE_URL + "avt/" + image;
         }
-        else {
-            String hinh = Utils.BASE_URL+"avt/"+image;
-            Glide.with(getApplicationContext()).load(hinh).placeholder(R.drawable.android).diskCacheStrategy(DiskCacheStrategy.NONE)
-                    .skipMemoryCache(true).into(imageViewAvatar);
-        }
+
+        Glide.with(getApplicationContext())
+                .load(imageUrl)
+                .placeholder(R.drawable.android)
+                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                .skipMemoryCache(true)
+                .into(imageViewAvatar);
     }
 }

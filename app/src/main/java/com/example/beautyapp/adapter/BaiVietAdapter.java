@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -40,6 +41,7 @@ public class BaiVietAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
     private Context context;
     private List<BaiViet> baiVietList;
+    private boolean isLike = false;
 
     public BaiVietAdapter(Context context, List<BaiViet> baiVietList) {
         this.context = context;
@@ -82,10 +84,12 @@ public class BaiVietAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                                 Log.d("BaiVietAdapter", baiViet.getId()+" "+ firebaseAuth.getUid());
                                 if(messageModel.isSuccess()){
                                     viewHolder.imgLike.setBackgroundResource(R.drawable.love1);
+                                    isLike = true;
                                     Log.e("BaiVietAdapter", messageModel.getMessage()+messageModel.isSuccess());
                                 }
                                 else {
                                     viewHolder.imgLike.setBackgroundResource(R.drawable.love);
+                                    isLike = false;
                                     Log.e("BaiVietAdapter", messageModel.getMessage()+messageModel.isSuccess());
                                 }
                             },
@@ -104,47 +108,93 @@ public class BaiVietAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                         into(viewHolder.imgUser);
             }
 
-            // Ảnh bài viết - kiểm tra có dữ liệu không
             if (baiViet.getLinkImage() != null && !baiViet.getLinkImage().isEmpty()) {
-                viewHolder.imgBaiViet.setVisibility(View.VISIBLE);
+                String link = baiViet.getLinkImage();
 
-                String postImgUrl = baiViet.getLinkImage().contains("https") ?
-                        baiViet.getLinkImage() :
-                        Utils.BASE_URL + "images/" + baiViet.getLinkImage();
+                if (link.contains("youtube.com") || link.contains("youtu.be")) {
+                    // Hiển thị WebView với video YouTube
+                    viewHolder.imgBaiViet.setVisibility(View.GONE);
+                    viewHolder.webView.setVisibility(View.VISIBLE);
 
-                Glide.with(context)
-                        .load(postImgUrl)
-                        .diskCacheStrategy(DiskCacheStrategy.NONE)
-                        .skipMemoryCache(true)
-                        .placeholder(R.drawable.android)
-                        .into(viewHolder.imgBaiViet);
-            } else {
-                // Ẩn nếu không có ảnh
-                viewHolder.imgBaiViet.setVisibility(View.GONE);
-            }
+                    viewHolder.webView.getSettings().setJavaScriptEnabled(true);
+                    viewHolder.webView.getSettings().setLoadWithOverviewMode(true);
+                    viewHolder.webView.getSettings().setUseWideViewPort(true);
 
-            viewHolder.imgLike.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (viewHolder.imgLike.getBackground().getConstantState() ==
-                            context.getResources().getDrawable(R.drawable.love1).getConstantState()) {
-                        return;
+                    // Convert YouTube link to embed format
+                    String videoId = "";
+                    if (link.contains("youtube.com")) {
+                        int index = link.indexOf("v=");
+                        if (index != -1) {
+                            videoId = link.substring(index + 2);
+                            int ampIndex = videoId.indexOf("&");
+                            if (ampIndex != -1) {
+                                videoId = videoId.substring(0, ampIndex);
+                            }
+                        }
+                    } else if (link.contains("youtu.be")) {
+                        int index = link.lastIndexOf("/");
+                        if (index != -1) {
+                            videoId = link.substring(index + 1);
+                        }
                     }
 
-                    compositeDisposable.add(api.setLike(baiViet.getId(),firebaseAuth.getUid())
-                            .subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(
-                                    messageModel -> {
-                                        baiViet.setNumberLike(baiViet.getNumberLike()+1);
-                                        viewHolder.tvSoLike.setText(String.valueOf(baiViet.getNumberLike()));
-                                        Log.d("baivietadapter","done");
-                                    }, throwable -> {
-                                        Log.d("baivietadapter",throwable.getMessage());
-                                    }
-                            ));
+                    String iframe = "<html><body style='margin:0'>" +
+                            "<iframe width='100%' height='100%' " +
+                            "src='https://www.youtube.com/embed/" + videoId + "' " +
+                            "frameborder='0' allowfullscreen></iframe>" +
+                            "</body></html>";
+
+                    viewHolder.webView.loadData(iframe, "text/html", "utf-8");
+
+                } else {
+                    // Hiển thị ảnh nếu không phải YouTube
+                    viewHolder.imgBaiViet.setVisibility(View.VISIBLE);
+                    viewHolder.webView.setVisibility(View.GONE);
+
+                    String postImgUrl = link.contains("https") ?
+                            link : Utils.BASE_URL + "images/" + link;
+
+                    Glide.with(context)
+                            .load(postImgUrl)
+                            .diskCacheStrategy(DiskCacheStrategy.NONE)
+                            .skipMemoryCache(true)
+                            .placeholder(R.drawable.android)
+                            .into(viewHolder.imgBaiViet);
                 }
-            });
+            } else {
+                // Ẩn cả ảnh và webview nếu không có link
+                viewHolder.imgBaiViet.setVisibility(View.GONE);
+                viewHolder.webView.setVisibility(View.GONE);
+            }
+
+
+
+            if(isLike == false){
+                viewHolder.imgLike.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if (viewHolder.imgLike.getBackground().getConstantState() ==
+                                context.getResources().getDrawable(R.drawable.love1).getConstantState()) {
+                            return;
+                        }
+
+                        compositeDisposable.add(api.setLike(baiViet.getId(),firebaseAuth.getUid())
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(
+                                        messageModel -> {
+                                            isLike = true;
+                                            baiViet.setNumberLike(baiViet.getNumberLike()+1);
+                                            viewHolder.tvSoLike.setText(String.valueOf(baiViet.getNumberLike()));
+                                            Log.d("baivietadapter","done");
+                                        }, throwable -> {
+                                            Log.d("baivietadapter",throwable.getMessage());
+                                        }
+                                ));
+                    }
+                });
+            }
+
         }
     }
 
@@ -158,6 +208,7 @@ public class BaiVietAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         CircleImageView imgUser;
         TextView tvName, tvTime, tvContent, tvSoLike;
         ImageView imgBaiViet, imgLike;
+        WebView webView;
 
         public BaiVietViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -168,6 +219,7 @@ public class BaiVietAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             tvSoLike = itemView.findViewById(R.id.soLikeItem);
             imgBaiViet = itemView.findViewById(R.id.imageBaiViet);
             imgLike = itemView.findViewById(R.id.likeItem);
+            webView = itemView.findViewById(R.id.webViewYoutube);
         }
     }
 

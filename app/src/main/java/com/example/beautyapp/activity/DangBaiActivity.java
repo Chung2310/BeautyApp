@@ -7,7 +7,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -30,7 +29,6 @@ import java.io.File;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-import io.paperdb.Paper;
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers;
 import io.reactivex.rxjava3.disposables.CompositeDisposable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
@@ -42,7 +40,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class DangBaiActivity extends AppCompatActivity {
-    private EditText editTextTitle, editTextContent;
+    private EditText  editTextContent, editTextYoutube;
     private ImageView imagePreview;
     private Button btnSelectImage, btnPost;
     private String mediaPath;
@@ -67,34 +65,56 @@ public class DangBaiActivity extends AppCompatActivity {
 
         btnPost.setOnClickListener(v -> {
             String content = editTextContent.getText().toString().trim();
+            String youtubeLink = editTextYoutube.getText().toString().trim();
             String date = "";
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 date = LocalDate.now().toString() + " " + LocalTime.now().toString();
             }
 
-            if (mediaPath == null || mediaPath.isEmpty()) {
-                Toast.makeText(this, "Vui lòng chọn ảnh trước khi đăng bài", Toast.LENGTH_SHORT).show();
+            if ((mediaPath == null || mediaPath.isEmpty()) && youtubeLink.isEmpty()) {
+                Toast.makeText(this, "Vui lòng chọn ảnh hoặc nhập link YouTube", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            uploadImageThenPost(date, content);
+            if (!youtubeLink.isEmpty() && !isValidYoutubeUrl(youtubeLink)) {
+                Toast.makeText(this, "Link YouTube không hợp lệ", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (mediaPath != null && !mediaPath.isEmpty()) {
+                uploadImageThenPost(date, content);
+            } else {
+                postArticleWithYoutubeLink(date, content, youtubeLink);
+            }
         });
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK && data != null) {
-            mediaPath = data.getDataString();
+    private void postArticleWithYoutubeLink(String date, String content, String youtubeLink) {
+        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+        String userId = firebaseAuth.getUid();
 
-            Glide.with(this)
-                    .load(mediaPath)
-                    .placeholder(R.drawable.android)
-                    .into(imagePreview);
-        } else {
-            Toast.makeText(this, "Không có hình ảnh nào được chọn", Toast.LENGTH_SHORT).show();
-        }
+        compositeDisposable.add(api.addArticle(
+                        userId,
+                        date,
+                        content,
+                        0,
+                        youtubeLink // dùng link YouTube như ảnh
+                )
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        messageModel -> {
+                            if (messageModel.isSuccess()) {
+                                Toast.makeText(getApplicationContext(), "Đăng bài thành công!", Toast.LENGTH_LONG).show();
+                                startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                                finish();
+                            } else {
+                                Log.d("dangbai", messageModel.getMessage());
+                            }
+                        },
+                        throwable -> Log.d("dangbai", throwable.getMessage())
+                ));
     }
 
     private void uploadImageThenPost(String date, String content) {
@@ -115,7 +135,6 @@ public class DangBaiActivity extends AppCompatActivity {
                 ImageModel serverResponse = response.body();
                 if (serverResponse != null && serverResponse.isSuccess()) {
                     String filename = serverResponse.getResult();
-
                     FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
                     String userId = firebaseAuth.getUid();
 
@@ -132,27 +151,22 @@ public class DangBaiActivity extends AppCompatActivity {
                                     messageModel -> {
                                         if (messageModel.isSuccess()) {
                                             Toast.makeText(getApplicationContext(), "Đăng bài thành công!", Toast.LENGTH_LONG).show();
-                                            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                                            startActivity(intent);
+                                            startActivity(new Intent(getApplicationContext(), MainActivity.class));
                                             finish();
                                         } else {
-                                            Log.d("dangbai",messageModel.getMessage());
-
+                                            Log.d("dangbai", messageModel.getMessage());
                                         }
                                     },
-                                    throwable -> {
-                                        Log.d("dangbai", throwable.getMessage());
-                                    }
+                                    throwable -> Log.d("dangbai", throwable.getMessage())
                             ));
                 } else {
-                    Log.d("dangbai","Lỗi khi tải ảnh lên");
+                    Log.d("dangbai", "Lỗi khi tải ảnh lên");
                 }
             }
 
             @Override
             public void onFailure(Call<ImageModel> call, Throwable t) {
                 Log.d("uploadAvt", t.getMessage());
-
             }
         });
     }
@@ -168,9 +182,14 @@ public class DangBaiActivity extends AppCompatActivity {
         return path;
     }
 
+    private boolean isValidYoutubeUrl(String url) {
+        String regex = "^(https?://)?(www\\.)?(youtube\\.com|youtu\\.?be)/.+$";
+        return url != null && url.matches(regex);
+    }
+
     private void anhXa() {
         editTextContent = findViewById(R.id.editTextContent);
-        editTextTitle = findViewById(R.id.editTextTitle);
+        editTextYoutube = findViewById(R.id.editTextYoutubeLink);
         imagePreview = findViewById(R.id.imagePreview);
         btnPost = findViewById(R.id.btnPost);
         btnSelectImage = findViewById(R.id.btnSelectImage);

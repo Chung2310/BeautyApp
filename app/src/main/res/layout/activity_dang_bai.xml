@@ -11,19 +11,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <!-- Tiêu đề bài viết -->
-        <EditText
-            android:id="@+id/editTextTitle"
-            android:hint="Nhập tiêu đề"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="textCapSentences"
-            android:background="@android:drawable/edit_text"
-            android:padding="10dp"
-            android:textColor="#000000"
-            android:textColorHint="#888888"
-            android:textSize="16sp" />
-
         <!-- Nội dung bài viết -->
         <EditText
             android:id="@+id/editTextContent"
@@ -46,17 +33,32 @@
             android:layout_height="200dp"
             android:layout_marginTop="12dp"
             android:scaleType="centerCrop"
-            android:background="#FFE4E1" /> <!-- Màu nền ảnh hồng pastel -->
+            android:background="#FFE4E1"
+            android:visibility="gone" /> <!-- Ẩn ảnh khi chưa có -->
 
         <!-- Nút chọn ảnh -->
         <Button
             android:id="@+id/btnSelectImage"
-            android:text="Chọn ảnh"
+            android:text="Chọn ảnh từ thiết bị"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:textColor="#FFFFFF"
-            android:backgroundTint="#FF69B4" /> <!-- Hồng đậm nhẹ -->
+            android:backgroundTint="#FF69B4" />
+
+        <!-- Nhập link YouTube -->
+        <EditText
+            android:id="@+id/editTextYoutubeLink"
+            android:hint="Hoặc dán link YouTube"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:inputType="textUri"
+            android:background="@android:drawable/edit_text"
+            android:padding="10dp"
+            android:textColor="#000000"
+            android:textColorHint="#888888"
+            android:textSize="16sp" />
 
         <!-- Nút đăng bài -->
         <Button
@@ -66,7 +68,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:textColor="#FFFFFF"
-            android:backgroundTint="#FF1493" /> <!-- Hồng đậm hơn một chút -->
+            android:backgroundTint="#FF1493" />
 
     </LinearLayout>
 </ScrollView>

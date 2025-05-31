@@ -25,9 +25,27 @@ import java.util.List;
 public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductViewHolder> {
 
     private List<Product> productList = new ArrayList<>();
+    private List<Product> fullList = new ArrayList<>(); // Danh sách gốc không thay đổi
 
     public void setProductList(List<Product> products) {
         this.productList = products;
+        this.fullList = new ArrayList<>(products); // Lưu bản sao để tìm kiếm
+        notifyDataSetChanged();
+    }
+
+    // Thêm phương thức filter
+    public void filter(String query) {
+        if (query == null || query.trim().isEmpty()) {
+            productList = new ArrayList<>(fullList);
+        } else {
+            List<Product> filteredList = new ArrayList<>();
+            for (Product p : fullList) {
+                if (p.getName().toLowerCase().contains(query.toLowerCase())) {
+                    filteredList.add(p);
+                }
+            }
+            productList = filteredList;
+        }
         notifyDataSetChanged();
     }
 
@@ -41,32 +59,26 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
 
     @Override
     public void onBindViewHolder(@NonNull ProductViewHolder holder, int position) {
-
-        ProductViewHolder myViewHolder = (ProductViewHolder) holder;
-
         Product p = productList.get(position);
-        Log.d("adapter product",p.toString());
+
         holder.name.setText(p.getName());
         DecimalFormat decimalFormat = new DecimalFormat("###,###,###");
-        holder.price.setText("Giá: "+decimalFormat.format(Double.parseDouble(p.getPrice()))+ "Đ");
+        holder.price.setText("Giá: " + decimalFormat.format(Double.parseDouble(p.getPrice())) + "Đ");
         holder.stock.setText("Còn lại: " + p.getStock());
 
-        if(p.getImage().get(0).contains("https")){
+        if (p.getImage().get(0).contains("https")) {
             Glide.with(holder.itemView.getContext()).load(p.getImage().get(0)).into(holder.image);
-        }
-        else {
-            String hinh = Utils.BASE_URL+"image/"+p.getImage().get(0);
+        } else {
+            String hinh = Utils.BASE_URL + "image/" + p.getImage().get(0);
             Glide.with(holder.itemView.getContext()).load(hinh).into(holder.image);
         }
-        myViewHolder.setItemClickListener(new ItemClickListener() {
-            @Override
-            public void onClick(View view, int pos, boolean isLongClick) {
-                if(!isLongClick){
-                    Intent intent = new Intent(holder.itemView.getContext(), DetailProductActivity.class);
-                    intent.putExtra("product", p);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    holder.itemView.getContext().startActivity(intent);
-                }
+
+        holder.setItemClickListener((view, pos, isLongClick) -> {
+            if (!isLongClick) {
+                Intent intent = new Intent(holder.itemView.getContext(), DetailProductActivity.class);
+                intent.putExtra("product", p);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                holder.itemView.getContext().startActivity(intent);
             }
         });
     }
@@ -76,7 +88,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
         return productList.size();
     }
 
-    static class ProductViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    static class ProductViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private TextView name, price, stock;
         private ImageView image;
         private ItemClickListener itemClickListener;
@@ -89,12 +101,14 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
             image = itemView.findViewById(R.id.imageProduct);
             itemView.setOnClickListener(this);
         }
+
         public void setItemClickListener(ItemClickListener itemClickListener) {
             this.itemClickListener = itemClickListener;
         }
+
         @Override
         public void onClick(View v) {
-            itemClickListener.onClick(v ,getAdapterPosition(),false);
+            itemClickListener.onClick(v, getAdapterPosition(), false);
         }
     }
 }
